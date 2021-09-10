@@ -1,0 +1,16 @@
+# binary files
+
+*.bin 
+
+
+# temp files
+tmp/
+
+
+# logging files
+*.log 
+
+# vendor
+vendor/
+
+*.txt
