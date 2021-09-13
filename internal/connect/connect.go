@@ -64,7 +64,7 @@ func (c *Connect) RunWS() {
 }
 
 func (c *Connect) runWSRPC() error {
-
+	// todo
 	return nil
 }
 

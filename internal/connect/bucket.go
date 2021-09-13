@@ -67,12 +67,12 @@ func (b *Bucket) PutUserIntoGroup(uid, gid uint64, d *Dialog) error {
 	group, ok := b.groups[gid]
 	if !ok {
 		group = NewGroup(gid)
+		b.groups[gid] = group
 	}
 
 	d.Group = group
 	d.UserID = uid
 
-	b.groups[gid] = group
 	b.dialogs[uid] = d
 
 	return group.Join(d)

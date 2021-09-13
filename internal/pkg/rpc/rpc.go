@@ -26,9 +26,13 @@ func GetStub(serverPath string) *Stub {
 		stub *Stub
 		err  error
 	)
-	if _, ok := stubs[serverPath]; !ok {
+
+	stub, ok := stubs[serverPath]
+
+	if !ok {
 		rwMux.Lock()
-		stub, err = getStub(serverPath)
+
+		stub, err = newStub(serverPath)
 
 		if err != nil {
 			logger.Panic(err)
@@ -55,7 +59,7 @@ func (stub *Stub) Call(fcn string, arg proto.ILogicArg, reply proto.ILogicReply,
 	return checkf(reply)
 }
 
-func getStub(serverPath string) (*Stub, error) {
+func newStub(serverPath string) (*Stub, error) {
 	stub := new(Stub)
 
 	zkd, err := xclient.NewZookeeperDiscovery(

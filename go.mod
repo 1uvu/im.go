@@ -15,5 +15,6 @@ require (
 	github.com/spf13/viper v1.8.1 // indirect
 	golang.org/x/net v0.0.0-20210903162142-ad29c8ab022f // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gorm.io/gorm v1.21.12 // indirect
+	gorm.io/driver/sqlite v1.1.5
+	gorm.io/gorm v1.21.15
 )
