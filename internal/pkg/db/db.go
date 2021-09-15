@@ -35,7 +35,6 @@ func GetDB(dbName string, controller DBController, option DBOption) *gorm.DB {
 
 	if !ok {
 		rwMux.Lock()
-
 		db, err = controller.NewDB(option)
 
 		if err != nil {

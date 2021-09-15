@@ -52,7 +52,7 @@ func (c *Connect) RunWS() {
 		BroadcastSize:  conf.Server.BroadcastSize,
 	})
 
-	c.ServerID = fmt.Sprintf("%s-%s", "ws", uuid.New().String())
+	c.ServerID = fmt.Sprintf("connect-%s-%s", "ws", uuid.New().String())
 
 	if err := c.runWSRPC(); err != nil {
 		logger.Panicf("run websocket rpc server got error: %s", err.Error())

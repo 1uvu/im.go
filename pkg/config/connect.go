@@ -3,13 +3,14 @@ package config
 import "time"
 
 type ConnectConfig struct {
-	Auth         ConnectAuth         `yaml:"auth"`
-	Websocket    ConnectWebsocket    `yaml:"websocket"`
-	WebsocketRPC ConnectWebsocketRPC `yaml:"websocketRPC"`
-	TCP          ConnectTCP          `yaml:"tcp"`
-	TCPRPC       ConnectTCPRPC       `yaml:"tcpRPC"`
-	Bucket       ConnectBucket       `yaml:"bucket"`
-	Server       ConnectServer       `yaml:"server"`
+	SessionExpireTime time.Duration       `yaml:"sessionExpireTime"`
+	Auth              ConnectAuth         `yaml:"auth"`
+	Websocket         ConnectWebsocket    `yaml:"websocket"`
+	WebsocketRPC      ConnectWebsocketRPC `yaml:"websocketRPC"`
+	TCP               ConnectTCP          `yaml:"tcp"`
+	TCPRPC            ConnectTCPRPC       `yaml:"tcpRPC"`
+	Bucket            ConnectBucket       `yaml:"bucket"`
+	Server            ConnectServer       `yaml:"server"`
 }
 
 type ConnectAuth struct {

@@ -13,8 +13,8 @@ type Bucket struct {
 	option    BucketOption
 	dialogs   map[uint64]*Dialog
 	groups    map[uint64]*Group
-	args      []chan *proto.GroupChatArg
-	argsNum   uint64
+	reqs      []chan *proto.GroupChatRequest
+	reqsNum   uint64
 	broadcast chan []byte
 }
 
@@ -32,12 +32,12 @@ func NewBucket(bid uint32, option BucketOption) *Bucket {
 	b.option = option
 	b.dialogs = make(map[uint64]*Dialog, option.DialogNum)
 	b.groups = make(map[uint64]*Group, option.GroupNum)
-	b.args = make([]chan *proto.GroupChatArg, option.ArgAmount)
+	b.reqs = make([]chan *proto.GroupChatRequest, option.ArgAmount)
 	b.broadcast = make(chan []byte)
 
-	for i := range b.args {
-		arg := make(chan *proto.GroupChatArg, option.ArgSize)
-		b.args[i] = arg
+	for i := range b.reqs {
+		arg := make(chan *proto.GroupChatRequest, option.ArgSize)
+		b.reqs[i] = arg
 
 		go b.GroupChat(arg)
 	}
@@ -45,7 +45,7 @@ func NewBucket(bid uint32, option BucketOption) *Bucket {
 	return b
 }
 
-func (b *Bucket) GroupChat(argCh chan *proto.GroupChatArg) {
+func (b *Bucket) GroupChat(argCh chan *proto.GroupChatRequest) {
 	arg := <-argCh
 	if group, ok := b.GetGroup(arg.GroupID); ok {
 		group.Chat(&arg.Msg)
@@ -104,7 +104,7 @@ func (b *Bucket) GetDialog(uid uint64) (*Dialog, bool) {
 	return dialog, ok
 }
 
-func (b *Bucket) Broadcast(arg *proto.GroupChatArg) {
-	argsNum := atomic.AddUint64(&b.argsNum, 1) % b.option.ArgAmount
-	b.args[argsNum] <- arg
+func (b *Bucket) Broadcast(arg *proto.GroupChatRequest) {
+	reqsNum := atomic.AddUint64(&b.reqsNum, 1) % b.option.ArgAmount
+	b.reqs[reqsNum] <- arg
 }

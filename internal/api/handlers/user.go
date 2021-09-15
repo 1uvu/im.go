@@ -10,41 +10,6 @@ import (
 	"im/pkg/proto"
 )
 
-type FormSignin struct {
-	Username string `form:"username" json:"username" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
-}
-
-func Signin(c *gin.Context) {
-	var form FormSignin
-	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
-		Failed(c, Response{})
-		return
-	}
-
-	reply := new(proto.SigninReply)
-
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
-		"Signin",
-		&proto.SigninArg{
-			UserName: form.Username,
-			Password: common.SHA1(form.Password),
-		},
-		reply,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.SigninReply)
-			return _reply.Code != proto.CodeFailed && _reply.AuthToken != ""
-		},
-	)
-
-	if !ok {
-		Failed(c, NewResponse(reply.GetErrMsg(), nil))
-		return
-	}
-
-	Success(c, NewResponse("ok", nil))
-}
-
 type FormSignup struct {
 	Username string `form:"username" json:"username" binding:"required"`
 	Password string `form:"password" json:"password" binding:"required"`
@@ -68,7 +33,42 @@ func Signup(c *gin.Context) {
 		reply,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.SignupReply)
-			return _reply.Code != proto.CodeFailed && _reply.AuthToken != ""
+			return _reply.Code != proto.CodeFailedReply && _reply.AuthToken != ""
+		},
+	)
+
+	if !ok {
+		Failed(c, NewResponse(reply.GetErrMsg(), nil))
+		return
+	}
+
+	Success(c, NewResponse("ok", nil))
+}
+
+type FormSignin struct {
+	Username string `form:"username" json:"username" binding:"required"`
+	Password string `form:"password" json:"password" binding:"required"`
+}
+
+func Signin(c *gin.Context) {
+	var form FormSignin
+	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
+		Failed(c, Response{})
+		return
+	}
+
+	reply := new(proto.SigninReply)
+
+	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+		"Signin",
+		&proto.SigninArg{
+			UserName: form.Username,
+			Password: common.SHA1(form.Password),
+		},
+		reply,
+		func(reply proto.ILogicReply) bool {
+			_reply := reply.(*proto.SigninReply)
+			return _reply.Code != proto.CodeFailedReply && _reply.AuthToken != ""
 		},
 	)
 
@@ -101,7 +101,7 @@ func Signout(c *gin.Context) {
 		reply,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.SignoutReply)
-			return _reply.Code != proto.CodeFailed
+			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
@@ -133,7 +133,7 @@ func AuthCheck(c *gin.Context) {
 		reply,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.AuthCheckReply)
-			return _reply.Code != proto.CodeFailed && _reply.UserID >= 0 && _reply.UserName != ""
+			return _reply.Code != proto.CodeFailedReply && _reply.UserID >= 0 && _reply.UserName != ""
 		},
 	)
 

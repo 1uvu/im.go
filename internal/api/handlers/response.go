@@ -22,11 +22,11 @@ func NewResponse(msg string, data common.Any) Response {
 }
 
 func Success(c *gin.Context, resp Response) {
-	ResponseWithCode(c, proto.CodeSuccess, resp)
+	ResponseWithCode(c, proto.CodeSuccessReply, resp)
 }
 
 func Failed(c *gin.Context, resp Response) {
-	ResponseWithCode(c, proto.CodeFailed, resp)
+	ResponseWithCode(c, proto.CodeFailedReply, resp)
 }
 
 func ResponseWithCode(c *gin.Context, code int, resp Response) {

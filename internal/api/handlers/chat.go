@@ -38,7 +38,7 @@ func PeerChat(c *gin.Context) {
 		replyUserInfoQuery,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.UserInfoQueryReply)
-			return _reply.Code != proto.CodeFailed
+			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
@@ -59,7 +59,7 @@ func PeerChat(c *gin.Context) {
 		replyAuthCheck,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.AuthCheckReply)
-			return _reply.Code != proto.CodeFailed && _reply.UserID >= 0 && _reply.UserName != ""
+			return _reply.Code != proto.CodeFailedReply && _reply.UserID >= 0 && _reply.UserName != ""
 		},
 	)
 
@@ -76,7 +76,7 @@ func PeerChat(c *gin.Context) {
 	replyPeerChat := new(proto.OpReply)
 
 	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
-		"Chat",
+		"PeerChat",
 		&proto.OpArg{
 			Msg:          form.Msg,
 			FromUserId:   fromUserID,
@@ -89,7 +89,7 @@ func PeerChat(c *gin.Context) {
 		replyPeerChat,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.OpReply)
-			return _reply.Code != proto.CodeFailed
+			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
@@ -125,7 +125,7 @@ func GroupChat(c *gin.Context) {
 		replyAuthCheck,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.AuthCheckReply)
-			return _reply.Code != proto.CodeFailed
+			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
@@ -142,7 +142,7 @@ func GroupChat(c *gin.Context) {
 	replyGroupChat := new(proto.OpReply)
 
 	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
-		"Chat",
+		"GroupChat",
 		&proto.OpArg{
 			Msg:          form.Msg,
 			FromUserId:   fromUserID,
@@ -153,7 +153,7 @@ func GroupChat(c *gin.Context) {
 		replyGroupChat,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.OpReply)
-			return _reply.Code != proto.CodeFailed
+			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
@@ -191,7 +191,7 @@ func GroupCount(c *gin.Context) {
 		reply,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.OpReply)
-			return _reply.Code != proto.CodeFailed
+			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
@@ -228,7 +228,7 @@ func GroupInfo(c *gin.Context) {
 		reply,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.OpReply)
-			return _reply.Code != proto.CodeFailed
+			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 

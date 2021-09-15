@@ -11,10 +11,10 @@ import (
 )
 
 type UserModel struct {
-	UserID   int       `gorm:"primarykey" model:"user_id"`
-	UserName string    `model:"username"`
-	Password string    `model:"password"`
-	Creatime time.Time `model:"createtime"`
+	UserID         uint64    `gorm:"primarykey" model:"user_id"`
+	UserName       string    `model:"username"`
+	SaltedPassword string    `model:"saltedPassword"`
+	Creatime       time.Time `model:"createtime"`
 }
 
 const tableName = "user"
@@ -32,31 +32,35 @@ var (
 	logicDB = db.GetDB(dbName, dbController, dbOption)
 )
 
-func Create(user *UserModel) error {
+func newUserID() uint64 {
+	return 1
+}
+
+func Create(user *UserModel) (uint64, error) {
 	_, err := Read(user.UserID)
 
 	if err == nil {
-		return common.UserHasExistedError
+		return 0, common.UserHasExistedError
 	}
 
 	if user.UserName == "" {
-		return common.InvaildUserNameError
+		return 0, common.InvaildUserNameError
 	}
 
-	if len(user.Password) < 8 {
-		return common.InvaildPasswordError
+	if len(common.UnsaltPassword(user.SaltedPassword)) < 8 {
+		return 0, common.InvaildPasswordError
 	}
 
 	user.Creatime = time.Now()
 
 	if err = logicDB.Table(tableName).Create(&user).Error; err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return newUserID(), nil
 }
 
-func Read(userID int) (*UserModel, error) {
+func Read(userID uint64) (*UserModel, error) {
 	var user *UserModel
 	err := logicDB.Table(tableName).First(user, userID).Error
 
@@ -67,7 +71,7 @@ func Read(userID int) (*UserModel, error) {
 	return user, nil
 }
 
-func ReadByName(userName int) (*UserModel, error) {
+func ReadByName(userName string) (*UserModel, error) {
 	field, _ := reflect.TypeOf(UserModel{}).FieldByName("UserName")
 	tag := field.Tag
 	nameTag := tag.Get("modle")
@@ -83,7 +87,7 @@ func ReadByName(userName int) (*UserModel, error) {
 	return user, nil
 }
 
-func Update(userID int, newUser UserModel) error {
+func Update(userID uint64, newUser UserModel) error {
 	user, err := Read(userID)
 
 	if err != nil {
@@ -97,7 +101,7 @@ func Update(userID int, newUser UserModel) error {
 	return nil
 }
 
-func UpdateField(userID int, fieldName string, fieldValue interface{}) error {
+func UpdateField(userID uint64, fieldName string, fieldValue interface{}) error {
 	user, err := Read(userID)
 
 	if err != nil {

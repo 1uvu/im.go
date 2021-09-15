@@ -7,15 +7,17 @@ const (
 	OpGroupChat
 	OpGroupCount
 	OpGroupInfo
+	OpBuildTCPConn
 )
 
 var opTexts = map[int]string{
 	opUnknown: "Unknown",
 
-	OpPeerChat:   "PeerChat",
-	OpGroupChat:  "GroupChat",
-	OpGroupCount: "GroupCount",
-	OpGroupInfo:  "GroupInfo",
+	OpPeerChat:     "PeerChat",
+	OpGroupChat:    "GroupChat",
+	OpGroupCount:   "GroupCount",
+	OpGroupInfo:    "GroupInfo",
+	OpBuildTCPConn: "BuildTCPConn",
 }
 
 func OPText(op int) string {

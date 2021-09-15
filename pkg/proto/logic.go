@@ -1,25 +1,34 @@
 package proto
 
 type ILogicArg interface {
+	MustEmbedDefaultLogicArg()
 }
 
 type ILogicReply interface {
 	GetErrMsg() string
 	SetErrMsg(string)
+	MustEmbedDefaultLogicReply()
 }
 
 type LogicArg struct{}
+
+func (arg *LogicArg) MustEmbedDefaultLogicArg() {
+}
 
 type LogicReply struct {
 	ErrMsg string `json:"errMsg"`
 }
 
-func (resp *LogicReply) GetErrMsg() string {
-	return resp.ErrMsg
+func (reply *LogicReply) GetErrMsg() string {
+	return reply.ErrMsg
 }
 
-func (resp *LogicReply) SetErrMsg(msg string) {
-	resp.ErrMsg = msg
+func (reply *LogicReply) SetErrMsg(msg string) {
+	reply.ErrMsg = msg
+}
+
+func (reply *LogicReply) MustEmbedDefaultLogicReply() {
+
 }
 
 type SigninArg struct {

@@ -35,7 +35,7 @@ func SessionCheck() gin.HandlerFunc {
 			reply,
 			func(reply proto.ILogicReply) bool {
 				_reply := reply.(*proto.AuthCheckReply)
-				return _reply.Code != proto.CodeFailed && _reply.UserID >= 0 && _reply.UserName != ""
+				return _reply.Code != proto.CodeFailedReply && _reply.UserID >= 0 && _reply.UserName != ""
 			},
 		)
 

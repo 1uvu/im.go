@@ -30,7 +30,7 @@ func (op *DefaultOperator) Connnect(arg *proto.ConnectArg) (*proto.ConnectReply,
 		reply,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.ConnectReply)
-			return _reply.Code != proto.CodeFailed && _reply.UserID != 0
+			return _reply.Code != proto.CodeFailedReply && _reply.UserID != 0
 		},
 	)
 
@@ -51,7 +51,7 @@ func (op *DefaultOperator) Disconnect(arg *proto.DisconnectArg) (*proto.Disconne
 		reply,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.DisconnectReply)
-			return _reply.Code != proto.CodeFailed
+			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 

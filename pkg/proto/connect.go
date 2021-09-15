@@ -7,17 +7,17 @@ type Msg struct {
 	Body      []byte `json:"body"`
 }
 
-type PeerChatArg struct {
+type PeerChatRequest struct {
 	UserID uint64
 	Msg    Msg
 }
 
-type GroupChatArg struct {
+type GroupChatRequest struct {
 	GroupID uint64
 	Msg     Msg
 }
 
-type GroupCountArg struct {
+type GroupCountRequest struct {
 	GroupID uint64
 	Count   uint64
 }
