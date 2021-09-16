@@ -31,19 +31,19 @@ package proto
 
 // }
 
-type PublishOpArg struct {
+type PublishArg struct {
 	Op             int               `json:"op"`
 	ServerID       string            `json:"serverID,omitempty"`
-	GroupID        uint64            `json:"groupID,omitempty"`
+	GroupID        int               `json:"groupID,omitempty"`
 	UserID         uint64            `json:"userID,omitempty"`
 	Msg            []byte            `json:"msg"`
-	Count          uint64            `json:"count"`
+	Count          int               `json:"count"`
 	GroupUserInfos map[string]string `json:"groupUserInfos"`
 }
 
 type PublishGroupInfoArg struct {
 	Op             int               `json:"op"`
-	GroupID        uint64            `json:"groupID,omitempty"`
+	GroupID        int               `json:"groupID,omitempty"`
 	Count          uint64            `json:"count,omitempty"`
 	GroupUserInfos map[string]string `json:"groupUserInfos"`
 }

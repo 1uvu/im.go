@@ -16,7 +16,7 @@ func init() {
 	router = gin.Default()
 	router.Use(middlewares.CORS())
 	initUserRouter(router)
-	initChatRouter(router)
+	initPushRouter(router)
 	router.NoRoute(func(c *gin.Context) {
 		handlers.ResponseWithCode(c, proto.Code404, handlers.NewResponse("request uri not found", nil))
 	})
@@ -35,9 +35,9 @@ func initUserRouter(r *gin.Engine) {
 	userGroup.Use(middlewares.SessionCheck())
 }
 
-func initChatRouter(r *gin.Engine) {
-	r.POST("/peer/chat", handlers.PeerChat)
-	r.POST("/group/chat", handlers.GroupChat)
+func initPushRouter(r *gin.Engine) {
+	r.POST("/peer/push", handlers.PeerPush)
+	r.POST("/group/push", handlers.GroupPush)
 	r.POST("/group/count", handlers.GroupCount)
 	r.POST("/group/info", handlers.GroupInfo)
 	r.Use(middlewares.SessionCheck())

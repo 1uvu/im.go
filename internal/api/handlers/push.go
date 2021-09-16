@@ -7,26 +7,27 @@ import (
 	"github.com/gin-gonic/gin/binding"
 
 	"im/internal/pkg/rpc"
+	"im/pkg/common"
 	"im/pkg/config"
 	"im/pkg/proto"
 )
 
-type FormPeerChat struct {
+type FormPeerPush struct {
 	Msg       string `form:"msg" json:"msg" binding:"required"`
 	ToUserID  string `form:"toUserID" json:"toUserID" binding:"required"`
 	ToGroupID string `form:"toGroupID" json:"toGroupID" binding:"required"`
 	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
 }
 
-func PeerChat(c *gin.Context) {
-	var form FormPeerChat
+func PeerPush(c *gin.Context) {
+	var form FormPeerPush
 
 	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
 		Failed(c, Response{})
 		return
 	}
 
-	toUserID, _ := strconv.Atoi(form.ToUserID)
+	toUserID, _ := strconv.ParseUint(form.ToUserID, 0, 64)
 
 	replyUserInfoQuery := new(proto.UserInfoQueryReply)
 
@@ -59,7 +60,7 @@ func PeerChat(c *gin.Context) {
 		replyAuthCheck,
 		func(reply proto.ILogicReply) bool {
 			_reply := reply.(*proto.AuthCheckReply)
-			return _reply.Code != proto.CodeFailedReply && _reply.UserID >= 0 && _reply.UserName != ""
+			return _reply.Code != proto.CodeFailedReply && _reply.UserID >= uint64(0) && _reply.UserName != ""
 		},
 	)
 
@@ -73,42 +74,43 @@ func PeerChat(c *gin.Context) {
 
 	toGroupID, _ := strconv.Atoi(form.ToGroupID)
 
-	replyPeerChat := new(proto.OpReply)
+	replyPeerPush := new(proto.PushReply)
 
 	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
-		"PeerChat",
-		&proto.OpArg{
+		"PeerPush",
+		&proto.PushArg{
 			Msg:          form.Msg,
 			FromUserId:   fromUserID,
 			FromUserName: fromUserName,
 			ToUserId:     toUserID,
 			ToUserName:   toUserName,
 			GroupId:      toGroupID,
-			Op:           proto.OpPeerChat,
+			Op:           proto.OpPeerPush,
+			Timestamp:    common.CreateTimestamp(),
 		},
-		replyPeerChat,
+		replyPeerPush,
 		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.OpReply)
+			_reply := reply.(*proto.PushReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(replyPeerChat.GetErrMsg(), nil))
+		Failed(c, NewResponse(replyPeerPush.GetErrMsg(), nil))
 		return
 	}
 
 	Success(c, NewResponse("ok", nil))
 }
 
-type FormGroupChat struct {
+type FormGroupPush struct {
 	Msg       string `form:"msg" json:"msg" binding:"required"`
 	ToGroupID string `form:"toGroupID" json:"toGroupID" binding:"required"`
 	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
 }
 
-func GroupChat(c *gin.Context) {
-	var form FormGroupChat
+func GroupPush(c *gin.Context) {
+	var form FormGroupPush
 
 	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
 		Failed(c, Response{})
@@ -139,26 +141,27 @@ func GroupChat(c *gin.Context) {
 
 	toGroupID, _ := strconv.Atoi(form.ToGroupID)
 
-	replyGroupChat := new(proto.OpReply)
+	replyGroupPush := new(proto.PushReply)
 
 	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
-		"GroupChat",
-		&proto.OpArg{
+		"GroupPush",
+		&proto.PushArg{
 			Msg:          form.Msg,
 			FromUserId:   fromUserID,
 			FromUserName: fromUserName,
 			GroupId:      toGroupID,
-			Op:           proto.OpGroupChat,
+			Op:           proto.OpGroupPush,
+			Timestamp:    common.CreateTimestamp(),
 		},
-		replyGroupChat,
+		replyGroupPush,
 		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.OpReply)
+			_reply := reply.(*proto.PushReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(replyGroupChat.GetErrMsg(), nil))
+		Failed(c, NewResponse(replyGroupPush.GetErrMsg(), nil))
 		return
 	}
 
@@ -180,17 +183,18 @@ func GroupCount(c *gin.Context) {
 
 	groupID, _ := strconv.Atoi(form.GroupID)
 
-	reply := new(proto.OpReply)
+	reply := new(proto.PushReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"GroupCount",
-		&proto.OpArg{
-			GroupId: groupID,
-			Op:      proto.OpGroupCount,
+		&proto.PushArg{
+			GroupId:   groupID,
+			Op:        proto.OpGroupCount,
+			Timestamp: common.CreateTimestamp(),
 		},
 		reply,
 		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.OpReply)
+			_reply := reply.(*proto.PushReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
@@ -217,17 +221,18 @@ func GroupInfo(c *gin.Context) {
 
 	groupID, _ := strconv.Atoi(form.GroupID)
 
-	reply := new(proto.OpReply)
+	reply := new(proto.PushReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"GroupInfo",
-		&proto.OpArg{
-			GroupId: groupID,
-			Op:      proto.OpGroupInfo,
+		&proto.PushArg{
+			GroupId:   groupID,
+			Op:        proto.OpGroupInfo,
+			Timestamp: common.CreateTimestamp(),
 		},
 		reply,
 		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.OpReply)
+			_reply := reply.(*proto.PushReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)

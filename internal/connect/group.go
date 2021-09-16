@@ -8,14 +8,14 @@ import (
 )
 
 type Group struct {
-	GroupID uint64
+	GroupID int
 	Count   uint64
 	rwMux   sync.RWMutex
 	live    bool
 	head    *Dialog
 }
 
-func NewGroup(gid uint64) *Group {
+func NewGroup(gid int) *Group {
 	return &Group{
 		GroupID: gid,
 		live:    true,
@@ -42,12 +42,12 @@ func (g *Group) Join(d *Dialog) error {
 	return nil
 }
 
-func (g *Group) Chat(msg *proto.Msg) {
+func (g *Group) Push(msg *proto.Msg) {
 	g.rwMux.RLock()
 	defer g.rwMux.RUnlock()
 
 	for d := g.head; d != nil; d = d.Next {
-		d.Chat(msg)
+		d.Push(msg)
 	}
 }
 

@@ -3,8 +3,8 @@ package proto
 const (
 	opUnknown = -100
 
-	OpPeerChat = iota
-	OpGroupChat
+	OpPeerPush = iota
+	OpGroupPush
 	OpGroupCount
 	OpGroupInfo
 	OpBuildTCPConn
@@ -13,8 +13,8 @@ const (
 var opTexts = map[int]string{
 	opUnknown: "Unknown",
 
-	OpPeerChat:     "PeerChat",
-	OpGroupChat:    "GroupChat",
+	OpPeerPush:     "PeerPush",
+	OpGroupPush:    "GroupPush",
 	OpGroupCount:   "GroupCount",
 	OpGroupInfo:    "GroupInfo",
 	OpBuildTCPConn: "BuildTCPConn",

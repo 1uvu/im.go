@@ -81,37 +81,38 @@ type AuthCheckReply struct {
 	*LogicReply
 
 	Code     int
-	UserID   int
+	UserID   uint64
 	UserName string
 }
 
 type UserInfoQueryArg struct {
 	*LogicArg
 
-	UserID int
+	UserID uint64
 }
 
 type UserInfoQueryReply struct {
 	*LogicReply
 
 	Code     int
-	UserID   int
+	UserID   uint64
 	UserName string
 }
 
-type OpArg struct {
+type PushArg struct {
 	*LogicArg
 
-	Msg          string
-	FromUserId   int
-	FromUserName string
-	ToUserId     int
-	ToUserName   string
-	GroupId      int
-	Op           int
+	Msg          string `json:"msg"`
+	FromUserId   uint64 `json:"fromUserID"`
+	FromUserName string `json:"fromUserName"`
+	ToUserId     uint64 `json:"toUserID"`
+	ToUserName   string `json:"toUserName"`
+	GroupId      int    `json:"groupID"`
+	Op           int    `json:"op"`
+	Timestamp    string `json:"timestamp"`
 }
 
-type OpReply struct {
+type PushReply struct {
 	*LogicReply
 
 	Code int
@@ -122,7 +123,7 @@ type ConnectArg struct {
 	*LogicArg
 
 	AuthToken string `json:"authToken"`
-	GroupID   uint64 `json:"groupID"`
+	GroupID   int    `json:"groupID"`
 	ServerID  int    `json:"serverID"`
 }
 
@@ -136,7 +137,7 @@ type ConnectReply struct {
 type DisconnectArg struct {
 	*LogicArg
 
-	GroupID uint64
+	GroupID int
 	UserID  uint64
 }
 

@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 const (
@@ -17,4 +18,8 @@ func ParseNetworkAddr(str string) (network, addr string, err error) {
 		addr = str[idx+1:]
 	}
 	return
+}
+
+func CreateTimestamp() string {
+	return time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
 }

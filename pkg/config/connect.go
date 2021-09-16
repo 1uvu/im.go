@@ -48,7 +48,7 @@ type ConnectTCPRPC struct {
 type ConnectBucket struct {
 	CPUs      int    `yaml:"cpus"`
 	DialogNum uint64 `yaml:"dialogNum"`
-	GroupNum  uint64 `yaml:"groupNum"`
+	GroupNum  int    `yaml:"groupNum"`
 	ArgAmount uint64 `yaml:"argAmount"`
 	ArgSize   uint64 `yaml:"argSize"`
 	SrvProto  int    `yaml:"srvProto"`

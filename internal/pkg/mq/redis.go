@@ -56,8 +56,8 @@ func GetRedisInstance(option RedisOption) *RedisInstance {
 	return instance
 }
 
-func (instance *RedisInstance) Push(publishOpArg proto.PublishOpArg) error {
-	publishOpArgAsBytes, err := json.Marshal(publishOpArg)
+func (instance *RedisInstance) Push(publishArg proto.PublishArg) error {
+	publishArgAsBytes, err := json.Marshal(publishArg)
 
 	if err != nil {
 		logger.Errorf("logic publish peer marshal got error: %s", err.Error())
@@ -66,7 +66,7 @@ func (instance *RedisInstance) Push(publishOpArg proto.PublishOpArg) error {
 
 	publishQueueName := config.GetConfig().Common.Redis.QueueName
 
-	if err := instance.Client.LPush(publishQueueName, publishOpArgAsBytes).Err(); err != nil {
+	if err := instance.Client.LPush(publishQueueName, publishArgAsBytes).Err(); err != nil {
 		logger.Errorf("logic publish redis lpush got error: %s", err.Error())
 		return err
 	}

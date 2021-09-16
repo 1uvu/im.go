@@ -25,7 +25,7 @@ func NewDialog(uid uint64, size int) *Dialog {
 	}
 }
 
-func (d *Dialog) Chat(msg *proto.Msg) error {
+func (d *Dialog) Push(msg *proto.Msg) error {
 	select {
 	case d.broadcast <- msg:
 	default:

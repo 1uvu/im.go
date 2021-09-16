@@ -1,13 +1,36 @@
 package common
 
-import "errors"
+import (
+	"errors"
+)
 
 // todo 改为 const, error 分类 等等
+type CommonError error
 
 var (
-	InvaildUserNameError   = errors.New("invaild user name len == 0")
-	InvaildPasswordError   = errors.New("invaild password len < 8")
-	UnmatchedPasswordError = errors.New("unmatched password")
-	UserHasExistedError    = errors.New("user has existed")
-	SignoutFailedError     = errors.New("user signout failed")
+	ErrInvaildUserName      = errors.New("invaild user name len == 0")
+	ErrInvaildPassword      = errors.New("invaild password len < 8")
+	ErrUnmatchedPassword    = errors.New("unmatched password")
+	ErrUnmatchedAuthToken   = errors.New("unmatched auth token")
+	ErrSessionHasExpired    = errors.New("session has expired")
+	ErrSessionDeletFailed   = errors.New("session delete failed")
+	ErrUserServerQuitFailed = errors.New("user quit server failed")
+	ErrUserHasExisted       = errors.New("user has existed")
+	ErrUserNotExisted       = errors.New("user not existed")
+	ErrUserSignoutFailed    = errors.New("user signout failed")
+	ErrMarshalPushArgFailed = errors.New("marshal push arg failed")
+	ErrPublishFailed        = errors.New("publish arg failed")
+	ErrGetGroupUsersFailed  = errors.New("get group user infos failed")
+	ErrGetGroupCountFailed  = errors.New("get group user count failed")
+	ErrGroupIsNotLive       = errors.New("group has 0 user and it is not live now")
+	ErrConnectFailed        = errors.New("connect failed")
+	ErrDisconnectFailed     = errors.New("disconnect failed")
 )
+
+// func Err() CommonError {
+// 	return
+// }
+
+// func ErrWithMsg(err CommonError, errMsg string) CommonError {
+// 	return fmt.Errorf("error: %s with msg: %s", err.Error(), errMsg)
+// }

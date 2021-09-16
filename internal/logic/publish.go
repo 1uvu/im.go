@@ -19,9 +19,16 @@ func (logic *Logic) RunPublishInstance() error {
 	return err
 }
 
-func (logic *Logic) Publish(publishOpArg proto.PublishOpArg) error {
+func (logic *Logic) Publish(publishArg proto.PublishArg) error {
 
-	err := publishInstance.Push(publishOpArg)
+	err := publishInstance.Push(publishArg)
+
+	return err
+}
+
+func (logic *Logic) Puah(publishArg proto.PublishArg) error {
+
+	err := publishInstance.Push(publishArg)
 
 	return err
 }

@@ -40,15 +40,15 @@ func Create(user *UserModel) (uint64, error) {
 	_, err := Read(user.UserID)
 
 	if err == nil {
-		return 0, common.UserHasExistedError
+		return 0, common.ErrUserHasExisted
 	}
 
 	if user.UserName == "" {
-		return 0, common.InvaildUserNameError
+		return 0, common.ErrInvaildUserName
 	}
 
 	if len(common.UnsaltPassword(user.SaltedPassword)) < 8 {
-		return 0, common.InvaildPasswordError
+		return 0, common.ErrInvaildPassword
 	}
 
 	user.Creatime = time.Now()
