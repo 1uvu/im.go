@@ -1,18 +1,9 @@
 package common
 
 import (
-	"crypto/sha1"
 	"encoding/binary"
-	"fmt"
 	"unsafe"
 )
-
-func SHA1(text string) string {
-	h := sha1.New()
-	h.Write([]byte(text))
-	hashedText := h.Sum(nil)
-	return fmt.Sprintf("%x", hashedText)
-}
 
 /*
  * Go implementation of Google city hash (MIT license)

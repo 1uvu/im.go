@@ -1,12 +1,9 @@
 package connect
 
 import (
-	"fmt"
 	"net/http"
 	"runtime"
 	"time"
-
-	"github.com/google/uuid"
 
 	"im/internal/pkg/logger"
 	"im/internal/pkg/rpc"
@@ -14,7 +11,6 @@ import (
 )
 
 type Connect struct {
-	ServerID string
 }
 
 var DefaultServer *Server
@@ -23,12 +19,12 @@ func NewConnect() *Connect {
 	return &Connect{}
 }
 
-func (c *Connect) RunWS() {
+func (connect *Connect) RunWS() {
 	conf := config.GetConfig().Connect
 
 	runtime.GOMAXPROCS(conf.Bucket.CPUs)
 
-	if err := c.runWS(); err != nil {
+	if err := connect.runWS(); err != nil {
 		logger.Panic(err)
 	}
 
@@ -53,26 +49,23 @@ func (c *Connect) RunWS() {
 		BroadcastSize:  conf.Server.BroadcastSize,
 	})
 
-	c.ServerID = fmt.Sprintf("connect-%s-%s", "ws", uuid.New().String())
-
-	if err := c.runWSRPC(); err != nil {
+	if err := connect.runWSRPC(); err != nil {
 		logger.Panicf("run websocket rpc server got error: %s", err.Error())
 	}
 
-	if err := c.runWS(); err != nil {
+	if err := connect.runWS(); err != nil {
 		logger.Panicf("run websocket server got error: %s", err.Error())
 	}
 }
 
-func (c *Connect) runWSRPC() error {
-	rpcServer := rpc.RPCServer{}
-	err := rpcServer.Run(config.GetConfig().Connect.WebsocketRPC.Address)
+func (connect *Connect) runWSRPC() error {
+	err := rpc.RunRPCServer(config.GetConfig().Common.ETCD.ServerPathConnect, config.GetConfig().Connect.WebsocketRPC.RPCAddress, new(ConnectRPCServer))
 	return err
 }
 
-func (conn *Connect) runWS() error {
+func (connect *Connect) runWS() error {
 	http.HandleFunc("/ws", func(rw http.ResponseWriter, r *http.Request) {
-		conn.serverWS(DefaultServer, rw, r)
+		connect.serverWS(DefaultServer, rw, r)
 	})
 
 	err := http.ListenAndServe(config.GetConfig().Connect.Websocket.Bind, nil)

@@ -19,16 +19,16 @@ type ConnectAuth struct {
 }
 
 type ConnectWebsocket struct {
-	ServerID string `yaml:"serverID"`
-	Bind     string `yaml:"bind"`
+	ServerIDx string `yaml:"serverIDx"`
+	Bind      string `yaml:"bind"`
 }
 
 type ConnectWebsocketRPC struct {
-	Address string `yaml:"address"`
+	RPCAddress string `yaml:"rpcAddress"`
 }
 
 type ConnectTCP struct {
-	ServerID         string `yaml:"serverID"`
+	ServerIDx        string `yaml:"serverIDx"`
 	Bind             string `yaml:"bind"`
 	SendBuffer       int    `yaml:"sendBuffer"`
 	ReceiveBuffer    int    `yaml:"receiveBuffer"`
@@ -42,7 +42,7 @@ type ConnectTCP struct {
 }
 
 type ConnectTCPRPC struct {
-	Address string `yaml:"address"`
+	RPCAddress string `yaml:"rpcAddress"`
 }
 
 type ConnectBucket struct {

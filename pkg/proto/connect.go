@@ -22,7 +22,6 @@ type ConnectGroupArg struct {
 	*DefaultRPCArg
 
 	GroupID int
-	Count   uint64
 	Msg     Msg
 }
 

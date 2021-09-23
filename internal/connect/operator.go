@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"im/internal/pkg/rpc"
+	"im/pkg/common"
 	"im/pkg/config"
 	"im/pkg/proto"
 )
@@ -26,7 +27,10 @@ func (op *DefaultOperator) Connnect(arg *proto.LogicConnectArg) (*proto.LogicCon
 
 	reply := new(proto.LogicConnectReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+
+	ok := stub.Call(
+		arg.ServerIDx,
 		"Connect",
 		arg,
 		reply,
@@ -47,7 +51,11 @@ func (op *DefaultOperator) Disconnect(arg *proto.LogicDisconnectArg) (*proto.Log
 
 	reply := new(proto.LogicDisconnectReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+	serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok := stub.Call(
+		serverIDx,
 		"Disconnect",
 		arg,
 		reply,

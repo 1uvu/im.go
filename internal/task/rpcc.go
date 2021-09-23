@@ -1,6 +1,7 @@
 package task
 
 import (
+	"encoding/json"
 	"im/internal/pkg/logger"
 	"im/internal/pkg/rpc"
 	"im/pkg/common"
@@ -22,6 +23,7 @@ func (task *Task) peerPush(pushArg *PushArg) {
 	reply := new(proto.ConnectReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathConnect).Call(
+		pushArg.ServerIDx,
 		"Peer",
 		arg,
 		reply,
@@ -37,21 +39,82 @@ func (task *Task) peerPush(pushArg *PushArg) {
 
 }
 
-func (task *Task) groupPush(pushArg *PushArg) {
+func (task *Task) groupPush(param *proto.TaskGroupPushParam) {
 	arg := &proto.ConnectGroupArg{
-		GroupID: pushArg.GroupID,
-		Count:   pushArg.Count,
+		GroupID: param.GroupID,
 		Msg: proto.Msg{
 			Ver:       proto.GetVersion(),
-			Operation: proto.OpGroupPush,
+			Operation: param.Op,
 			SeqID:     common.GetSnowflakeID(1),
-			Body:      pushArg.Msg,
+			Body:      param.Msg,
 		},
 	}
 
 	reply := new(proto.ConnectReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathConnect).Call(
+	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathConnect).CallAll(
+		"Group",
+		arg,
+		reply,
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.ConnectReply)
+			return _reply.Code != proto.CodeFailedReply
+		},
+	)
+
+	if !ok {
+		logger.Errorf("rpc call connect group push got error: %s", reply.GetErrMsg())
+	}
+}
+
+func (task *Task) groupCount(param *proto.TaskGroupCountParam) {
+
+	paramAsBytes, _ := json.Marshal(param)
+
+	arg := &proto.ConnectGroupArg{
+		GroupID: param.GroupID,
+		Msg: proto.Msg{
+			Ver:       proto.GetVersion(),
+			Operation: param.Op,
+			SeqID:     common.GetSnowflakeID(1),
+			Body:      paramAsBytes,
+		},
+	}
+
+	reply := new(proto.ConnectReply)
+
+	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathConnect).CallAll(
+		"Group",
+		arg,
+		reply,
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.ConnectReply)
+			return _reply.Code != proto.CodeFailedReply
+		},
+	)
+
+	if !ok {
+		logger.Errorf("rpc call connect group push got error: %s", reply.GetErrMsg())
+	}
+}
+
+func (task *Task) groupInfo(param *proto.TaskGroupInfoParam) {
+
+	paramAsBytes, _ := json.Marshal(param)
+
+	arg := &proto.ConnectGroupArg{
+		GroupID: param.GroupID,
+		Msg: proto.Msg{
+			Ver:       proto.GetVersion(),
+			Operation: param.Op,
+			SeqID:     common.GetSnowflakeID(1),
+			Body:      paramAsBytes,
+		},
+	}
+
+	reply := new(proto.ConnectReply)
+
+	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathConnect).CallAll(
 		"Group",
 		arg,
 		reply,

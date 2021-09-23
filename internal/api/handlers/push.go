@@ -26,7 +26,11 @@ func PeerPush(c *gin.Context) {
 
 	replyUserInfoQuery := new(proto.LogicUserInfoQueryReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+	serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok := stub.Call(
+		serverIDx,
 		"UserInfoQuery",
 		&proto.LogicUserInfoQueryArg{
 			UserID: toUserID,
@@ -47,7 +51,10 @@ func PeerPush(c *gin.Context) {
 
 	replyAuthCheck := new(proto.LogicAuthCheckReply)
 
-	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	serverIDx = common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok = stub.Call(
+		serverIDx,
 		"AuthCheck",
 		&proto.LogicAuthCheckArg{
 			AuthToken: req.AuthToken,
@@ -71,7 +78,10 @@ func PeerPush(c *gin.Context) {
 
 	replyPeerPush := new(proto.LogicPeerPushReply)
 
-	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	serverIDx = common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok = stub.Call(
+		serverIDx,
 		"PeerPush",
 		&proto.LogicPeerPushArg{
 			Msg:          req.Msg,
@@ -108,7 +118,11 @@ func GroupPush(c *gin.Context) {
 
 	replyAuthCheck := new(proto.LogicAuthCheckReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+	serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok := stub.Call(
+		serverIDx,
 		"AuthCheck",
 		&proto.LogicAuthCheckArg{
 			AuthToken: req.AuthToken,
@@ -130,12 +144,13 @@ func GroupPush(c *gin.Context) {
 
 	fromUserID := replyAuthCheck.UserID
 	fromUserName := replyAuthCheck.UserName
-
 	toGroupID, _ := strconv.Atoi(req.ToGroupID)
-
 	replyGroupPush := new(proto.LogicGroupPushReply)
 
-	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	serverIDx = common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok = stub.Call(
+		serverIDx,
 		"GroupPush",
 		&proto.LogicGroupPushArg{
 			Msg:          req.Msg,
@@ -173,7 +188,11 @@ func GroupCount(c *gin.Context) {
 
 	reply := new(proto.LogicGroupCountReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+	serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok := stub.Call(
+		serverIDx,
 		"GroupCount",
 		&proto.LogicGroupCountArg{
 			GroupId:   groupID,
@@ -207,7 +226,11 @@ func GroupInfo(c *gin.Context) {
 
 	reply := new(proto.LogicGroupInfoReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+	serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok := stub.Call(
+		serverIDx,
 		"GroupInfo",
 		&proto.LogicGroupInfoArg{
 			GroupId:   groupID,

@@ -3,11 +3,11 @@ package config
 import "time"
 
 type LogicConfig struct {
-	ServerID   string    `yaml:"serverID"`
-	CPUs       int       `yaml:"cpus"`
-	RPCAddress string    `yaml:"rpcaddress"`
-	Auth       LogicAuth `yaml:"auth"`
-	DB         LogicDB   `yaml:"db"`
+	CPUs            int       `yaml:"cpus"`
+	RPCAddress      string    `yaml:"rpcaddress"`
+	SaltForPassword string    `yaml:"saltForPassword"`
+	Auth            LogicAuth `yaml:"auth"`
+	DB              LogicDB   `yaml:"db"`
 }
 
 type LogicAuth struct {

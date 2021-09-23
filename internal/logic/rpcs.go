@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"im/internal/logic/dao"
 	"im/internal/pkg/logger"
+	"im/internal/pkg/rpc"
 	"im/pkg/common"
 	"im/pkg/config"
 	"im/pkg/proto"
@@ -13,30 +14,29 @@ import (
 	"time"
 )
 
-type Stub struct{}
+type LogicRPCServer struct {
+	*rpc.DefaultRPCServer
+}
 
-func (stub *Stub) Signup(ctx context.Context, arg *proto.LogicSignupArg, reply *proto.LogicSignupReply) error {
+func (server *LogicRPCServer) Signup(ctx context.Context, arg *proto.LogicSignupArg, reply *proto.LogicSignupReply) error {
 	reply.Code = proto.CodeFailedReply
 	userModel := &dao.UserModel{
-		UserID:         1, // todo userID
 		UserName:       arg.UserName,
 		SaltedPassword: common.SaltPassword(arg.Password),
 	}
 
-	userID, err := dao.Create(userModel)
+	err := dao.Create(userModel)
 
 	if err != nil {
 		return err
 	}
 
-	userModel.UserID = userID
-
 	// set session
 	randToken := common.CreateToken(32)
 	sessionID := common.CreateSessionIDByToken(randToken)
 	session := map[string]interface{}{
-		"userID":   userID,
-		"userName": arg.UserName,
+		"userID":   userModel.UserID,
+		"userName": userModel.UserName,
 	}
 
 	sessionInstance.Client.Do("MULTI")
@@ -54,7 +54,7 @@ func (stub *Stub) Signup(ctx context.Context, arg *proto.LogicSignupArg, reply *
 	return nil
 }
 
-func (stub *Stub) Signin(ctx context.Context, arg *proto.LogicSigninArg, reply *proto.LogicSigninReply) error {
+func (server *LogicRPCServer) Signin(ctx context.Context, arg *proto.LogicSigninArg, reply *proto.LogicSigninReply) error {
 	reply.Code = proto.CodeFailedReply
 
 	userModel, err := dao.ReadByName(arg.UserName)
@@ -104,7 +104,7 @@ func (stub *Stub) Signin(ctx context.Context, arg *proto.LogicSigninArg, reply *
 	return nil
 }
 
-func (stub *Stub) Signout(ctx context.Context, arg *proto.LogicSignoutArg, reply *proto.LogicSignoutReply) error {
+func (server *LogicRPCServer) Signout(ctx context.Context, arg *proto.LogicSignoutArg, reply *proto.LogicSignoutReply) error {
 	reply.Code = proto.CodeFailedReply
 	sessionID := common.GetSessionIDByToken(arg.AuthToken)
 
@@ -145,7 +145,7 @@ func (stub *Stub) Signout(ctx context.Context, arg *proto.LogicSignoutArg, reply
 	return nil
 }
 
-func (stub *Stub) AuthCheck(ctx context.Context, arg *proto.LogicAuthCheckArg, reply *proto.LogicAuthCheckReply) error {
+func (server *LogicRPCServer) AuthCheck(ctx context.Context, arg *proto.LogicAuthCheckArg, reply *proto.LogicAuthCheckReply) error {
 	reply.Code = proto.CodeFailedReply
 	sessionID := common.GetSessionIDByToken(arg.AuthToken)
 
@@ -170,7 +170,7 @@ func (stub *Stub) AuthCheck(ctx context.Context, arg *proto.LogicAuthCheckArg, r
 	return nil
 }
 
-func (stub *Stub) UserInfoQuery(ctx context.Context, arg *proto.LogicUserInfoQueryArg, reply *proto.LogicUserInfoQueryReply) error {
+func (server *LogicRPCServer) UserInfoQuery(ctx context.Context, arg *proto.LogicUserInfoQueryArg, reply *proto.LogicUserInfoQueryReply) error {
 	reply.Code = proto.CodeFailedReply
 
 	userModel, err := dao.Read(arg.UserID)
@@ -186,7 +186,7 @@ func (stub *Stub) UserInfoQuery(ctx context.Context, arg *proto.LogicUserInfoQue
 	return nil
 }
 
-func (stub *Stub) PeerPush(ctx context.Context, arg *proto.LogicPeerPushArg, reply *proto.LogicPeerPushReply) error {
+func (server *LogicRPCServer) PeerPush(ctx context.Context, arg *proto.LogicPeerPushArg, reply *proto.LogicPeerPushReply) error {
 	reply.Code = proto.CodeFailedReply
 
 	argAsBytes, err := json.Marshal(arg)
@@ -197,13 +197,13 @@ func (stub *Stub) PeerPush(ctx context.Context, arg *proto.LogicPeerPushArg, rep
 	logic := NewLogic()
 
 	userServerIDKey := logic.getKey(config.GetConfig().Common.Redis.Prefix, fmt.Sprintf("%d", arg.ToUserId))
-	serverID := sessionInstance.Client.Get(userServerIDKey).Val()
+	serverIDx := sessionInstance.Client.Get(userServerIDKey).Val()
 
 	err = logic.Publish(proto.TaskPeerPushParam{
-		Op:       proto.OpPeerPush,
-		ServerID: serverID,
-		UserID:   arg.ToUserId,
-		Msg:      argAsBytes,
+		Op:        proto.OpPeerPush,
+		ServerIDx: serverIDx,
+		UserID:    arg.ToUserId,
+		Msg:       argAsBytes,
 	})
 
 	if err != nil {
@@ -215,7 +215,7 @@ func (stub *Stub) PeerPush(ctx context.Context, arg *proto.LogicPeerPushArg, rep
 	return nil
 }
 
-func (stub *Stub) GroupPush(ctx context.Context, arg *proto.LogicGroupPushArg, reply *proto.LogicGroupPushReply) error {
+func (server *LogicRPCServer) GroupPush(ctx context.Context, arg *proto.LogicGroupPushArg, reply *proto.LogicGroupPushReply) error {
 	reply.Code = proto.CodeFailedReply
 
 	argAsBytes, err := json.Marshal(arg)
@@ -229,7 +229,7 @@ func (stub *Stub) GroupPush(ctx context.Context, arg *proto.LogicGroupPushArg, r
 	groupUserInfos, err := publishInstance.Client.HGetAll(groupUsersKey).Result()
 
 	if err != nil {
-		// todo: 在类似的 err return 前加上 logger
+		// opt: 在类似的 err return 前加上 logger
 		return common.ErrGetGroupUsersFailed
 	}
 
@@ -238,11 +238,9 @@ func (stub *Stub) GroupPush(ctx context.Context, arg *proto.LogicGroupPushArg, r
 	}
 
 	err = logic.Publish(proto.TaskGroupPushParam{
-		Op:             proto.OpGroupPush,
-		GroupID:        arg.GroupId,
-		Count:          len(groupUserInfos),
-		Msg:            argAsBytes,
-		GroupUserInfos: groupUserInfos,
+		Op:      proto.OpGroupPush,
+		GroupID: arg.GroupId,
+		Msg:     argAsBytes,
 	})
 
 	if err != nil {
@@ -254,7 +252,7 @@ func (stub *Stub) GroupPush(ctx context.Context, arg *proto.LogicGroupPushArg, r
 	return nil
 }
 
-func (stub *Stub) GroupCount(ctx context.Context, arg *proto.LogicGroupCountArg, reply *proto.LogicGroupCountReply) error {
+func (server *LogicRPCServer) GroupCount(ctx context.Context, arg *proto.LogicGroupCountArg, reply *proto.LogicGroupCountReply) error {
 	reply.Code = proto.CodeFailedReply
 
 	logic := NewLogic()
@@ -269,7 +267,7 @@ func (stub *Stub) GroupCount(ctx context.Context, arg *proto.LogicGroupCountArg,
 	err = logic.Publish(proto.TaskGroupCountParam{
 		Op:      proto.OpGroupCount,
 		GroupID: arg.GroupId,
-		Count:   groupCount,
+		Count:   uint64(groupCount),
 	})
 
 	if err != nil {
@@ -281,7 +279,7 @@ func (stub *Stub) GroupCount(ctx context.Context, arg *proto.LogicGroupCountArg,
 	return nil
 }
 
-func (stub *Stub) GroupInfo(ctx context.Context, arg *proto.LogicGroupInfoArg, reply *proto.LogicGroupInfoReply) error {
+func (server *LogicRPCServer) GroupInfo(ctx context.Context, arg *proto.LogicGroupInfoArg, reply *proto.LogicGroupInfoReply) error {
 	reply.Code = proto.CodeFailedReply
 
 	logic := NewLogic()
@@ -290,7 +288,6 @@ func (stub *Stub) GroupInfo(ctx context.Context, arg *proto.LogicGroupInfoArg, r
 	groupUserInfos, err := publishInstance.Client.HGetAll(groupUsersKey).Result()
 
 	if err != nil {
-		// todo: 在类似的 err return 前加上 logger
 		return common.ErrGetGroupUsersFailed
 	}
 
@@ -301,7 +298,6 @@ func (stub *Stub) GroupInfo(ctx context.Context, arg *proto.LogicGroupInfoArg, r
 	err = logic.Publish(proto.TaskGroupInfoParam{
 		Op:             proto.OpGroupInfo,
 		GroupID:        arg.GroupId,
-		Count:          len(groupUserInfos),
 		GroupUserInfos: groupUserInfos,
 	})
 
@@ -314,7 +310,7 @@ func (stub *Stub) GroupInfo(ctx context.Context, arg *proto.LogicGroupInfoArg, r
 	return nil
 }
 
-func (stub *Stub) Connect(ctx context.Context, arg *proto.LogicConnectArg, reply *proto.LogicConnectReply) error {
+func (server *LogicRPCServer) Connect(ctx context.Context, arg *proto.LogicConnectArg, reply *proto.LogicConnectReply) error {
 	reply.Code = proto.CodeFailedReply
 
 	sessionID := common.CreateSessionIDByToken(arg.AuthToken)
@@ -339,7 +335,7 @@ func (stub *Stub) Connect(ctx context.Context, arg *proto.LogicConnectArg, reply
 	if reply.UserID != 0 {
 		userServerIDKey := logic.getKey(config.GetConfig().Common.Redis.Prefix, fmt.Sprintf("%d", reply.UserID))
 		validTime := config.GetConfig().Common.Redis.BaseValidTime * time.Second
-		err := publishInstance.Client.Set(userServerIDKey, arg.ServerID, validTime)
+		err := publishInstance.Client.Set(userServerIDKey, arg.ServerIDx, validTime)
 
 		if err != nil {
 			return common.ErrConnectFailed
@@ -356,7 +352,7 @@ func (stub *Stub) Connect(ctx context.Context, arg *proto.LogicConnectArg, reply
 	return nil
 }
 
-func (stub *Stub) Disconnect(ctx context.Context, arg *proto.LogicDisconnectArg, reply *proto.LogicDisconnectReply) error {
+func (server *LogicRPCServer) Disconnect(ctx context.Context, arg *proto.LogicDisconnectArg, reply *proto.LogicDisconnectReply) error {
 	reply.Code = proto.CodeFailedReply
 
 	logic := NewLogic()
@@ -376,18 +372,10 @@ func (stub *Stub) Disconnect(ctx context.Context, arg *proto.LogicDisconnectArg,
 		}
 	}
 
-	groupUserInfos, err := publishInstance.Client.HGetAll(groupUsersKey).Result()
-
-	if err != nil {
-		return common.ErrDisconnectFailed
-	}
-
 	if err := logic.Publish(proto.TaskGroupPushParam{
-		Op:             proto.OpGroupPush,
-		GroupID:        arg.GroupID,
-		Count:          len(groupUserInfos),
-		Msg:            nil,
-		GroupUserInfos: groupUserInfos,
+		Op:      proto.OpGroupPush,
+		GroupID: arg.GroupID,
+		Msg:     nil,
 	}); err != nil {
 		return common.ErrPublishFailed
 	}

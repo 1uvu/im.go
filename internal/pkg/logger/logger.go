@@ -6,8 +6,7 @@ import (
 	"os"
 )
 
-// todo 1 完成下面的函数
-// todo 2 使每一层使用自己的 logger, 实现 logger 层
+// opt 使每一层使用自己的 logger, 实现 logger 层
 
 var logger *log.Logger = log.New(os.Stdout, "", log.LstdFlags)
 var skip = 2

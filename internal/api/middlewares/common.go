@@ -8,6 +8,7 @@ import (
 
 	"im/internal/api/handlers"
 	"im/internal/pkg/rpc"
+	"im/pkg/common"
 	"im/pkg/config"
 	"im/pkg/proto"
 )
@@ -23,7 +24,11 @@ func SessionCheck() gin.HandlerFunc {
 
 		reply := new(proto.LogicAuthCheckReply)
 
-		ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+		stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+		serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+		ok := stub.Call(
+			serverIDx,
 			"AuthCheck",
 			&proto.LogicAuthCheckArg{
 				AuthToken: req.AuthToken,

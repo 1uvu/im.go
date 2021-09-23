@@ -96,8 +96,6 @@ type LogicGroupPushArg struct {
 	Msg          string `json:"msg"`
 	FromUserId   uint64 `json:"fromUserID"`
 	FromUserName string `json:"fromUserName"`
-	ToUserId     uint64 `json:"toUserID"`
-	ToUserName   string `json:"toUserName"`
 	GroupId      int    `json:"groupID"`
 	Op           int    `json:"op"`
 	Timestamp    string `json:"timestamp"`
@@ -113,14 +111,9 @@ type LogicGroupPushReply struct {
 type LogicGroupCountArg struct {
 	*DefaultRPCArg
 
-	Msg          string `json:"msg"`
-	FromUserId   uint64 `json:"fromUserID"`
-	FromUserName string `json:"fromUserName"`
-	ToUserId     uint64 `json:"toUserID"`
-	ToUserName   string `json:"toUserName"`
-	GroupId      int    `json:"groupID"`
-	Op           int    `json:"op"`
-	Timestamp    string `json:"timestamp"`
+	GroupId   int    `json:"groupID"`
+	Op        int    `json:"op"`
+	Timestamp string `json:"timestamp"`
 }
 
 type LogicGroupCountReply struct {
@@ -133,14 +126,9 @@ type LogicGroupCountReply struct {
 type LogicGroupInfoArg struct {
 	*DefaultRPCArg
 
-	Msg          string `json:"msg"`
-	FromUserId   uint64 `json:"fromUserID"`
-	FromUserName string `json:"fromUserName"`
-	ToUserId     uint64 `json:"toUserID"`
-	ToUserName   string `json:"toUserName"`
-	GroupId      int    `json:"groupID"`
-	Op           int    `json:"op"`
-	Timestamp    string `json:"timestamp"`
+	GroupId   int    `json:"groupID"`
+	Op        int    `json:"op"`
+	Timestamp string `json:"timestamp"`
 }
 
 type LogicGroupInfoReply struct {
@@ -155,7 +143,7 @@ type LogicConnectArg struct {
 
 	AuthToken string `json:"authToken"`
 	GroupID   int    `json:"groupID"`
-	ServerID  int    `json:"serverID"`
+	ServerIDx string `json:"serverIDx"`
 }
 
 type LogicConnectReply struct {

@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-// todo error 分类, 实现包装器 等等
+// opt error 分类, 实现包装器 等等
 type CommonError error
 
 var (
@@ -32,7 +32,8 @@ var (
 	ErrConnectFailed    = errors.New("connect failed")
 	ErrDisconnectFailed = errors.New("disconnect failed")
 
-	ErrNaNRPCArg = errors.New("rpc arg is nil")
+	ErrNaNRPCArg           = errors.New("rpc arg is nil")
+	ErrServerIDxNotExisted = errors.New("rpc call server id is not existed")
 )
 
 // func Err() CommonError {

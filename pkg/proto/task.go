@@ -21,47 +21,32 @@ func (param *DefaultTaskParam) GetOp() int {
 type TaskPeerPushParam struct {
 	*DefaultTaskParam
 
-	Op             int               `json:"op"`
-	ServerID       string            `json:"serverID,omitempty"`
-	GroupID        int               `json:"groupID,omitempty"`
-	UserID         uint64            `json:"userID,omitempty"`
-	Msg            []byte            `json:"msg"`
-	Count          int               `json:"count"`
-	GroupUserInfos map[string]string `json:"groupUserInfos"`
+	Op        int    `json:"op"`
+	ServerIDx string `json:"serverIDx,omitempty"`
+	UserID    uint64 `json:"userID,omitempty"`
+	Msg       []byte `json:"msg"`
 }
 
 type TaskGroupPushParam struct {
 	*DefaultTaskParam
 
-	Op             int               `json:"op"`
-	ServerID       string            `json:"serverID,omitempty"`
-	GroupID        int               `json:"groupID,omitempty"`
-	UserID         uint64            `json:"userID,omitempty"`
-	Msg            []byte            `json:"msg"`
-	Count          int               `json:"count"`
-	GroupUserInfos map[string]string `json:"groupUserInfos"`
+	Op      int    `json:"op"`
+	GroupID int    `json:"groupID,omitempty"`
+	Msg     []byte `json:"msg"`
 }
 
 type TaskGroupCountParam struct {
 	*DefaultTaskParam
 
-	Op             int               `json:"op"`
-	ServerID       string            `json:"serverID,omitempty"`
-	GroupID        int               `json:"groupID,omitempty"`
-	UserID         uint64            `json:"userID,omitempty"`
-	Msg            []byte            `json:"msg"`
-	Count          int               `json:"count"`
-	GroupUserInfos map[string]string `json:"groupUserInfos"`
+	Op      int    `json:"op"`
+	GroupID int    `json:"groupID,omitempty"`
+	Count   uint64 `json:"count"`
 }
 
 type TaskGroupInfoParam struct {
 	*DefaultTaskParam
 
 	Op             int               `json:"op"`
-	ServerID       string            `json:"serverID,omitempty"`
 	GroupID        int               `json:"groupID,omitempty"`
-	UserID         uint64            `json:"userID,omitempty"`
-	Msg            []byte            `json:"msg"`
-	Count          int               `json:"count"`
 	GroupUserInfos map[string]string `json:"groupUserInfos"`
 }

@@ -15,8 +15,13 @@ import (
 )
 
 type RPCStub struct {
-	// todo update stub.clients when kv changed
-	clients []xclient.XClient
+	// opt update stub.clients when kv changed
+	Clients   map[string]*RPCClient
+	ClientNum int
+}
+
+type RPCClient struct {
+	Client xclient.XClient
 }
 
 var stubs map[string]*RPCStub
@@ -51,23 +56,40 @@ func GetStub(serverPath string) *RPCStub {
 	return stub
 }
 
-func (stub *RPCStub) Call(fcn string, arg proto.IRPCArg, reply proto.IRPCReply, checkf func(reply proto.IRPCReply) bool) bool {
+func (stub *RPCStub) CallAll(fcn string, arg proto.IRPCArg, reply proto.IRPCReply, checkf func(reply proto.IRPCReply) bool) bool {
+	var ok bool = true
+	for serverIDx := range stub.Clients {
+
+		ok = ok && stub.Call(
+			serverIDx,
+			fcn,
+			arg,
+			reply,
+			checkf,
+		)
+
+	}
+
+	return ok
+}
+
+func (stub *RPCStub) Call(serverIDx string, fcn string, arg proto.IRPCArg, reply proto.IRPCReply, checkf func(reply proto.IRPCReply) bool) bool {
+	rpcclient, ok := stub.Clients[serverIDx]
+
+	if !ok {
+		reply.SetErrMsg(fmt.Sprintf("rpc call connect peer push got error: %s", common.ErrServerIDxNotExisted))
+		return false
+	}
+
 	if arg == nil {
 		reply.SetErrMsg(common.ErrNaNRPCArg.Error())
 		return false
 	}
 
-	var errs []error = make([]error, 0)
+	err := rpcclient.Client.Call(context.Background(), fcn, arg, reply)
 
-	for _, client := range stub.clients {
-		err := client.Call(context.Background(), fcn, arg, reply)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("client Call got error: %s", err.Error()))
-		}
-	}
-
-	if errs[0] != nil {
-		reply.SetErrMsg(errs[0].Error())
+	if err != nil {
+		reply.SetErrMsg(fmt.Sprintf("client Call got error: %s", err.Error()))
 	}
 
 	return checkf(reply)
@@ -87,7 +109,8 @@ func newStub(serverPath string) (*RPCStub, error) {
 		logger.Fatal(err.Error())
 	}
 
-	stub.clients = make([]xclient.XClient, 0, len(zkd.GetServices()))
+	stub.ClientNum = len(zkd.GetServices())
+	stub.Clients = make(map[string]*RPCClient, stub.ClientNum)
 
 	for _, service := range zkd.GetServices() {
 		d, err := xclient.NewPeer2PeerDiscovery(service.Key, "")
@@ -97,7 +120,7 @@ func newStub(serverPath string) (*RPCStub, error) {
 		}
 
 		client := xclient.NewXClient(serverPath, xclient.Failtry, xclient.RandomSelect, d, xclient.DefaultOption)
-		stub.clients = append(stub.clients, client)
+		stub.Clients[service.Value] = &RPCClient{Client: client}
 	}
 
 	if stub == nil {

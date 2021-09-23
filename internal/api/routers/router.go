@@ -8,7 +8,7 @@ import (
 	"im/pkg/proto"
 )
 
-// todo 1 为 API 提供 SDK 支持
+// opt 为 API 提供 SDK 支持
 
 var router *gin.Engine
 

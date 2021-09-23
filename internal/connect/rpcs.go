@@ -2,13 +2,15 @@ package connect
 
 import (
 	"im/internal/pkg/logger"
+	"im/internal/pkg/rpc"
 	"im/pkg/proto"
 )
 
-type Stub struct {
+type ConnectRPCServer struct {
+	*rpc.DefaultRPCServer
 }
 
-func (stub *Stub) Peer(arg *proto.ConnectPeerArg, reply *proto.ConnectReply) {
+func (server *ConnectRPCServer) Peer(arg *proto.ConnectPeerArg, reply *proto.ConnectReply) {
 	reply.Code = proto.CodeFailedReply
 
 	bucket := DefaultServer.GetBucket(arg.UserID)
@@ -24,7 +26,7 @@ func (stub *Stub) Peer(arg *proto.ConnectPeerArg, reply *proto.ConnectReply) {
 	reply.Code = proto.CodeSuccessReply
 }
 
-func (stub *Stub) Group(arg *proto.ConnectGroupArg, reply *proto.ConnectReply) {
+func (server *ConnectRPCServer) Group(arg *proto.ConnectGroupArg, reply *proto.ConnectReply) {
 	reply.Code = proto.CodeSuccessReply
 
 	for _, bucket := range DefaultServer.Buckets {

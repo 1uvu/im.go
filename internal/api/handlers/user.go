@@ -21,7 +21,11 @@ func Signup(c *gin.Context) {
 
 	reply := new(proto.LogicSignupReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+	serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok := stub.Call(
+		serverIDx,
 		"Signup",
 		&proto.LogicSignupArg{
 			UserName: req.Username,
@@ -51,7 +55,11 @@ func Signin(c *gin.Context) {
 
 	reply := new(proto.LogicSigninReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+	serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok := stub.Call(
+		serverIDx,
 		"Signin",
 		&proto.LogicSigninArg{
 			UserName: req.Username,
@@ -81,7 +89,11 @@ func Signout(c *gin.Context) {
 
 	reply := new(proto.LogicSignoutReply)
 
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+	serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok := stub.Call(
+		serverIDx,
 		"Signout",
 		&proto.LogicSignoutArg{
 			AuthToken: req.AuthToken,
@@ -109,7 +121,12 @@ func AuthCheck(c *gin.Context) {
 	}
 
 	reply := new(proto.LogicAuthCheckReply)
-	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
+
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+	serverIDx := common.GetServerIDx(config.GetConfig().Common.ETCD.ServerPathLogic, common.RandInt(stub.ClientNum))
+
+	ok := stub.Call(
+		serverIDx,
 		"AuthCheck",
 		&proto.LogicAuthCheckArg{
 			AuthToken: req.AuthToken,

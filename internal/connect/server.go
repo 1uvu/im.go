@@ -9,12 +9,14 @@ import (
 	"github.com/gorilla/websocket"
 
 	"im/internal/pkg/logger"
+	"im/internal/pkg/rpc"
 	"im/pkg/common"
+	"im/pkg/config"
 	"im/pkg/proto"
 )
 
 type Server struct {
-	ServerID  int
+	ServerIDx string
 	Buckets   []*Bucket
 	Option    ServerOption
 	bucketNum uint32
@@ -32,7 +34,12 @@ type ServerOption struct {
 }
 
 func NewServer(bs []*Bucket, op Operator, option ServerOption) *Server {
+	stub := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic)
+
 	return &Server{
+		// server 与 rpc server 相对应
+		// 则此处在原本的 rpc server idx 基础上自增 1
+		ServerIDx: common.NewServerIDx(config.GetConfig().Common.ETCD.ServerPathConnect, stub.ClientNum),
 		Buckets:   bs,
 		Option:    option,
 		bucketNum: uint32(len(bs)),
@@ -135,7 +142,7 @@ func (s *Server) readPump(d *Dialog, c *Connect) {
 			return
 		}
 
-		connReq.ServerID = s.ServerID
+		connReq.ServerIDx = s.ServerIDx
 		connResp, err := s.operator.Connnect(connReq)
 
 		if err != nil {

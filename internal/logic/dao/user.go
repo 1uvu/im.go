@@ -33,31 +33,39 @@ var (
 )
 
 func newUserID() uint64 {
+	/*
+		write uid generate rules here
+	*/
 	return 1
 }
 
-func Create(user *UserModel) (uint64, error) {
+func Create(user *UserModel) error {
 	_, err := Read(user.UserID)
 
 	if err == nil {
-		return 0, common.ErrUserHasExisted
+		return common.ErrUserHasExisted
 	}
 
 	if user.UserName == "" {
-		return 0, common.ErrInvaildUserName
+		return common.ErrInvaildUserName
 	}
 
 	if len(common.UnsaltPassword(user.SaltedPassword)) < 8 {
-		return 0, common.ErrInvaildPassword
+		return common.ErrInvaildPassword
 	}
 
 	user.Creatime = time.Now()
 
 	if err = logicDB.Table(tableName).Create(&user).Error; err != nil {
-		return 0, err
+		return err
 	}
+	/*
+		Create will auto generate userid, you can also generate uid byself:
 
-	return newUserID(), nil
+		user.UserID = newUserID()
+	*/
+
+	return nil
 }
 
 func Read(userID uint64) (*UserModel, error) {

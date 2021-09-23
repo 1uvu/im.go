@@ -28,5 +28,4 @@ func GetConfig() *Config {
 }
 
 func initConf() {
-	// todo 1 从 yaml 读取配置写入 conf
 }
