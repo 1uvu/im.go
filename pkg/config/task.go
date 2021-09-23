@@ -1,11 +1,10 @@
 package config
 
-type TaskConfig struct {
-	CPUs  int       `yaml:"cpus"`
-	Redis TaskRedis `yaml:"redis"`
-}
+import "time"
 
-type TaskRedis struct {
-	Address  string `yaml:"address"`
-	Password string `yaml:"password"`
+type TaskConfig struct {
+	CPUs          int           `yaml:"cpus"`
+	PushPolling   time.Duration `yam:"pushPolling"`
+	PushChanCap   int           `yaml:"pushChanCap"`
+	PushParamsCap int           `yaml:"pushParamsCap"`
 }

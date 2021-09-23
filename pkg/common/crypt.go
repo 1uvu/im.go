@@ -1,6 +1,6 @@
 package common
 
-func SaltPassword(password string) string {
+func SaltPassword(passwordHash string) string {
 	return ""
 }
 

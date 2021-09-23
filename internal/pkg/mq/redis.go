@@ -56,8 +56,8 @@ func GetRedisInstance(option RedisOption) *RedisInstance {
 	return instance
 }
 
-func (instance *RedisInstance) Push(publishArg proto.PublishArg) error {
-	publishArgAsBytes, err := json.Marshal(publishArg)
+func (instance *RedisInstance) Push(publishParam proto.ITaskParam) error {
+	publishArgAsBytes, err := json.Marshal(publishParam)
 
 	if err != nil {
 		logger.Errorf("logic publish peer marshal got error: %s", err.Error())

@@ -40,7 +40,7 @@ func NewServer(bs []*Bucket, op Operator, option ServerOption) *Server {
 	}
 }
 
-func (s *Server) BucketIdx(uid uint64) *Bucket {
+func (s *Server) GetBucket(uid uint64) *Bucket {
 	uidStr := fmt.Sprintf("%d", uid)
 	bid := common.CityHash32([]byte(uidStr), uint32(len(uidStr))) % s.bucketNum
 
@@ -92,12 +92,12 @@ func (s *Server) readPump(d *Dialog, c *Connect) {
 			return
 		}
 
-		disconnArg := &proto.DisconnectArg{
+		disconnArg := &proto.LogicDisconnectArg{
 			GroupID: d.Group.GroupID,
 			UserID:  d.UserID,
 		}
 
-		s.BucketIdx(d.UserID).DeleteDialog(d)
+		s.GetBucket(d.UserID).DeleteDialog(d)
 
 		if disconnResp, err := s.operator.Disconnect(disconnArg); err != nil {
 			logger.Warn("disconnect got error: %s, with code: %s", err.Error(), disconnResp.Code)
@@ -143,7 +143,7 @@ func (s *Server) readPump(d *Dialog, c *Connect) {
 			return
 		}
 
-		bucket := s.BucketIdx(connResp.UserID)
+		bucket := s.GetBucket(connResp.UserID)
 
 		err = bucket.PutUserIntoGroup(connResp.UserID, connReq.GroupID, d)
 
@@ -156,12 +156,12 @@ func (s *Server) readPump(d *Dialog, c *Connect) {
 
 }
 
-func readConnReq(msg []byte) (*proto.ConnectArg, error) {
+func readConnReq(msg []byte) (*proto.LogicConnectArg, error) {
 	if msg == nil {
 		return nil, errors.New("msg body for conn req is nil")
 	}
 
-	connReq := new(proto.ConnectArg)
+	connReq := new(proto.LogicConnectArg)
 
 	if err := json.Unmarshal([]byte(msg), &connReq); err != nil {
 		return nil, err

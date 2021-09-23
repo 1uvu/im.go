@@ -4,11 +4,18 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/bwmarrin/snowflake"
 )
 
 const (
 	NetworkSplitSign = "@"
 )
+
+func GetSnowflakeID(nodeID int64) string {
+	node, _ := snowflake.NewNode(nodeID)
+	return node.Generate().String()
+}
 
 func ParseNetworkAddr(str string) (network, addr string, err error) {
 	if idx := strings.Index(str, NetworkSplitSign); idx == -1 {

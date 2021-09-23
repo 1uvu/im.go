@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"im/internal/pkg/logger"
+	"im/internal/pkg/rpc"
 	"im/pkg/config"
 )
 
@@ -64,8 +65,9 @@ func (c *Connect) RunWS() {
 }
 
 func (c *Connect) runWSRPC() error {
-	// todo
-	return nil
+	rpcServer := rpc.RPCServer{}
+	err := rpcServer.Run(config.GetConfig().Connect.WebsocketRPC.Address)
+	return err
 }
 
 func (conn *Connect) runWS() error {

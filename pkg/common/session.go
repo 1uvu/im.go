@@ -7,7 +7,9 @@ import (
 	"io"
 )
 
-const SessionPrefix = "session_"
+const (
+	SessionPrefix = "session_"
+)
 
 func CreateToken(length int) string {
 	rd := make([]byte, length)

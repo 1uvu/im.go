@@ -9,31 +9,24 @@ import (
 )
 
 var (
-	publishInstance        *mq.RedisInstance
-	publishSessionInstance *mq.RedisInstance
+	publishInstance *mq.RedisInstance
+	sessionInstance *mq.RedisInstance
 )
 
-func (logic *Logic) RunPublishInstance() error {
-	err := logic.runRedisPublishInstance()
+func (logic *Logic) InitPublishInstance() error {
+	err := logic.initRedisPublishInstance()
 
 	return err
 }
 
-func (logic *Logic) Publish(publishArg proto.PublishArg) error {
+func (logic *Logic) Publish(publishParam proto.ITaskParam) error {
 
-	err := publishInstance.Push(publishArg)
-
-	return err
-}
-
-func (logic *Logic) Puah(publishArg proto.PublishArg) error {
-
-	err := publishInstance.Push(publishArg)
+	err := publishInstance.Push(publishParam)
 
 	return err
 }
 
-func (logic *Logic) runRedisPublishInstance() error {
+func (logic *Logic) initRedisPublishInstance() error {
 	option := mq.RedisOption{
 		Address:    config.GetConfig().Common.Redis.Address,
 		Password:   config.GetConfig().Common.Redis.Password,
@@ -46,10 +39,10 @@ func (logic *Logic) runRedisPublishInstance() error {
 	pong, err := publishInstance.Client.Ping().Result()
 
 	if err != nil {
-		logger.Errorf("redis instance ping result pong: %s, err: %s", pong, err.Error())
+		logger.Errorf("redis publish instance ping result pong: %s, err: %s", pong, err.Error())
 	}
 
-	publishSessionInstance = publishInstance
+	sessionInstance = publishInstance
 
 	return err
 }

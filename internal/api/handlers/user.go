@@ -10,137 +10,124 @@ import (
 	"im/pkg/proto"
 )
 
-type FormSignup struct {
-	Username string `form:"username" json:"username" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
-}
+// rpcc
 
 func Signup(c *gin.Context) {
-	var form FormSignup
-	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
-		Failed(c, Response{})
+	var req proto.APISignupRequest
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		Failed(c, "", nil)
 		return
 	}
 
-	reply := new(proto.SignupReply)
+	reply := new(proto.LogicSignupReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"Signup",
-		&proto.SignupArg{
-			UserName: form.Username,
-			Password: common.SHA1(form.Password),
+		&proto.LogicSignupArg{
+			UserName: req.Username,
+			Password: common.SHA1(req.Password),
 		},
 		reply,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.SignupReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicSignupReply)
 			return _reply.Code != proto.CodeFailedReply && _reply.AuthToken != ""
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(reply.GetErrMsg(), nil))
+		Failed(c, reply.GetErrMsg(), nil)
 		return
 	}
 
-	Success(c, NewResponse("ok", nil))
-}
-
-type FormSignin struct {
-	Username string `form:"username" json:"username" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
+	Success(c, "ok", nil)
 }
 
 func Signin(c *gin.Context) {
-	var form FormSignin
-	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
-		Failed(c, Response{})
+	var req proto.APISigninRequest
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		Failed(c, "", nil)
 		return
 	}
 
-	reply := new(proto.SigninReply)
+	reply := new(proto.LogicSigninReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"Signin",
-		&proto.SigninArg{
-			UserName: form.Username,
-			Password: common.SHA1(form.Password),
+		&proto.LogicSigninArg{
+			UserName: req.Username,
+			Password: common.SHA1(req.Password),
 		},
 		reply,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.SigninReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicSigninReply)
 			return _reply.Code != proto.CodeFailedReply && _reply.AuthToken != ""
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(reply.GetErrMsg(), nil))
+		Failed(c, reply.GetErrMsg(), nil)
 		return
 	}
 
-	Success(c, NewResponse("ok", nil))
-}
-
-type FormSignout struct {
-	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
+	Success(c, "ok", nil)
 }
 
 func Signout(c *gin.Context) {
-	var form FormSignout
-	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
-		Failed(c, Response{})
+	var req proto.APISignoutRequest
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		Failed(c, "", nil)
 		return
 	}
 
-	reply := new(proto.SignoutReply)
+	reply := new(proto.LogicSignoutReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"Signout",
-		&proto.SignoutArg{
-			AuthToken: form.AuthToken,
+		&proto.LogicSignoutArg{
+			AuthToken: req.AuthToken,
 		},
 		reply,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.SignoutReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicSignoutReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(reply.GetErrMsg(), nil))
+		Failed(c, reply.GetErrMsg(), nil)
 		return
 	}
 
-	Success(c, NewResponse("ok", nil))
-}
-
-type FormAuthCheck struct {
-	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
+	Success(c, "ok", nil)
 }
 
 func AuthCheck(c *gin.Context) {
-	var form FormAuthCheck
-	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
-		Failed(c, Response{})
+	var req proto.APIAuthCheckRequest
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		Failed(c, "", nil)
 		return
 	}
 
-	reply := new(proto.AuthCheckReply)
+	reply := new(proto.LogicAuthCheckReply)
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"AuthCheck",
-		&proto.AuthCheckArg{
-			AuthToken: form.AuthToken,
+		&proto.LogicAuthCheckArg{
+			AuthToken: req.AuthToken,
 		},
 		reply,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.AuthCheckReply)
-			return _reply.Code != proto.CodeFailedReply && _reply.UserID >= 0 && _reply.UserName != ""
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicAuthCheckReply)
+			return _reply.Code != proto.CodeFailedReply && _reply.UserID > 0 && _reply.UserName != ""
 		},
 	)
 
 	if !ok {
-		ResponseWithCode(c, proto.CodeSessionError, NewResponse(reply.GetErrMsg(), nil))
+		ResponseWithCode(c, proto.CodeSessionError, proto.APIResponse{
+			Msg:  reply.GetErrMsg(),
+			Data: nil,
+		})
 		return
 	}
 
-	Success(c, NewResponse("ok", nil))
+	Success(c, "ok", nil)
 }

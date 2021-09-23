@@ -1,23 +1,33 @@
 package proto
 
+// for task layer rpc call
+
 type Msg struct {
+	*DefaultRPCArg
+
 	Ver       int    `json:"ver"`
 	Operation int    `json:"op"`
 	SeqID     string `json:"seq"`
 	Body      []byte `json:"body"`
 }
 
-type PeerPushRequest struct {
+type ConnectPeerArg struct {
+	*DefaultRPCArg
+
 	UserID uint64
 	Msg    Msg
 }
 
-type GroupPushRequest struct {
+type ConnectGroupArg struct {
+	*DefaultRPCArg
+
 	GroupID int
+	Count   uint64
 	Msg     Msg
 }
 
-type GroupCountRequest struct {
-	GroupID int
-	Count   uint64
+type ConnectReply struct {
+	*DefaultRPCReply
+
+	Code int
 }

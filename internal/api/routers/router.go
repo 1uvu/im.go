@@ -18,7 +18,10 @@ func init() {
 	initUserRouter(router)
 	initPushRouter(router)
 	router.NoRoute(func(c *gin.Context) {
-		handlers.ResponseWithCode(c, proto.Code404, handlers.NewResponse("request uri not found", nil))
+		handlers.ResponseWithCode(c, proto.Code404, proto.APIResponse{
+			Msg:  "request uri not found",
+			Data: nil,
+		})
 	})
 }
 

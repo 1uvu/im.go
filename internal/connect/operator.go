@@ -10,26 +10,28 @@ import (
 )
 
 type Operator interface {
-	Connnect(*proto.ConnectArg) (*proto.ConnectReply, error)
-	Disconnect(*proto.DisconnectArg) (*proto.DisconnectReply, error)
+	Connnect(*proto.LogicConnectArg) (*proto.LogicConnectReply, error)
+	Disconnect(*proto.LogicDisconnectArg) (*proto.LogicDisconnectReply, error)
 }
 type DefaultOperator struct {
 }
 
-func (op *DefaultOperator) Connnect(arg *proto.ConnectArg) (*proto.ConnectReply, error) {
+// rpcc
+
+func (op *DefaultOperator) Connnect(arg *proto.LogicConnectArg) (*proto.LogicConnectReply, error) {
 
 	if arg.AuthToken == "" {
 		return nil, errors.New(("auth token of conn req is nil"))
 	}
 
-	reply := new(proto.ConnectReply)
+	reply := new(proto.LogicConnectReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"Connect",
 		arg,
 		reply,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.ConnectReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicConnectReply)
 			return _reply.Code != proto.CodeFailedReply && _reply.UserID != 0
 		},
 	)
@@ -41,16 +43,16 @@ func (op *DefaultOperator) Connnect(arg *proto.ConnectArg) (*proto.ConnectReply,
 	return reply, nil
 }
 
-func (op *DefaultOperator) Disconnect(arg *proto.DisconnectArg) (*proto.DisconnectReply, error) {
+func (op *DefaultOperator) Disconnect(arg *proto.LogicDisconnectArg) (*proto.LogicDisconnectReply, error) {
 
-	reply := new(proto.DisconnectReply)
+	reply := new(proto.LogicDisconnectReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"Disconnect",
 		arg,
 		reply,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.DisconnectReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicDisconnectReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)

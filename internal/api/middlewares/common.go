@@ -12,36 +12,35 @@ import (
 	"im/pkg/proto"
 )
 
-type FormSessionCheck struct {
-	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
-}
-
 func SessionCheck() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var form FormSessionCheck
-		if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
+		var req proto.APISessionCheckRequest
+		if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 			c.Abort()
-			handlers.ResponseWithCode(c, proto.CodeSessionError, handlers.Response{})
+			handlers.ResponseWithCode(c, proto.CodeSessionError, proto.APIResponse{})
 			return
 		}
 
-		reply := new(proto.AuthCheckReply)
+		reply := new(proto.LogicAuthCheckReply)
 
 		ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 			"AuthCheck",
-			&proto.AuthCheckArg{
-				AuthToken: form.AuthToken,
+			&proto.LogicAuthCheckArg{
+				AuthToken: req.AuthToken,
 			},
 			reply,
-			func(reply proto.ILogicReply) bool {
-				_reply := reply.(*proto.AuthCheckReply)
-				return _reply.Code != proto.CodeFailedReply && _reply.UserID >= 0 && _reply.UserName != ""
+			func(reply proto.IRPCReply) bool {
+				_reply := reply.(*proto.LogicAuthCheckReply)
+				return _reply.Code != proto.CodeFailedReply && _reply.UserID > 0 && _reply.UserName != ""
 			},
 		)
 
 		if !ok {
 			c.Abort()
-			handlers.ResponseWithCode(c, proto.CodeSessionError, handlers.NewResponse(reply.GetErrMsg(), nil))
+			handlers.ResponseWithCode(c, proto.CodeSessionError, proto.APIResponse{
+				Msg:  reply.GetErrMsg(),
+				Data: nil,
+			})
 			return
 		}
 

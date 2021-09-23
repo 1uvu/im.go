@@ -1,37 +1,26 @@
 package proto
 
-// type ITaskArg interface {
-// 	MustEmbedDefaultTaskArg()
-// }
+// for logic layer rpc call
 
-// type ITaskReply interface {
-// 	GetErrMsg() string
-// 	SetErrMsg(string)
-// 	MustEmbedDefaultTaskReply()
-// }
+type ITaskParam interface {
+	GetOp() int
+	MustEmbedDefaultTaskParam()
+}
 
-// type TaskArg struct{}
+type DefaultTaskParam struct {
+	Op int
+}
 
-// func (arg *TaskArg) MustEmbedDefaultTaskArg() {
-// }
+func (param *DefaultTaskParam) MustEmbedDefaultTaskParam() {
+}
 
-// type TaskReply struct {
-// 	ErrMsg string `json:"errMsg"`
-// }
+func (param *DefaultTaskParam) GetOp() int {
+	return param.Op
+}
 
-// func (reply *TaskReply) GetErrMsg() string {
-// 	return reply.ErrMsg
-// }
+type TaskPeerPushParam struct {
+	*DefaultTaskParam
 
-// func (reply *TaskReply) SetErrMsg(msg string) {
-// 	reply.ErrMsg = msg
-// }
-
-// func (reply *TaskReply) MustEmbedDefaultTaskReply() {
-
-// }
-
-type PublishArg struct {
 	Op             int               `json:"op"`
 	ServerID       string            `json:"serverID,omitempty"`
 	GroupID        int               `json:"groupID,omitempty"`
@@ -41,19 +30,38 @@ type PublishArg struct {
 	GroupUserInfos map[string]string `json:"groupUserInfos"`
 }
 
-type PublishGroupInfoArg struct {
+type TaskGroupPushParam struct {
+	*DefaultTaskParam
+
 	Op             int               `json:"op"`
+	ServerID       string            `json:"serverID,omitempty"`
 	GroupID        int               `json:"groupID,omitempty"`
-	Count          uint64            `json:"count,omitempty"`
+	UserID         uint64            `json:"userID,omitempty"`
+	Msg            []byte            `json:"msg"`
+	Count          int               `json:"count"`
 	GroupUserInfos map[string]string `json:"groupUserInfos"`
 }
 
-type PublishGroupCountArg struct {
-	Op    int    `json:"op"`
-	Count uint64 `json:"count,omitempty"`
+type TaskGroupCountParam struct {
+	*DefaultTaskParam
+
+	Op             int               `json:"op"`
+	ServerID       string            `json:"serverID,omitempty"`
+	GroupID        int               `json:"groupID,omitempty"`
+	UserID         uint64            `json:"userID,omitempty"`
+	Msg            []byte            `json:"msg"`
+	Count          int               `json:"count"`
+	GroupUserInfos map[string]string `json:"groupUserInfos"`
 }
 
-type PublishReply struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
+type TaskGroupInfoParam struct {
+	*DefaultTaskParam
+
+	Op             int               `json:"op"`
+	ServerID       string            `json:"serverID,omitempty"`
+	GroupID        int               `json:"groupID,omitempty"`
+	UserID         uint64            `json:"userID,omitempty"`
+	Msg            []byte            `json:"msg"`
+	Count          int               `json:"count"`
+	GroupUserInfos map[string]string `json:"groupUserInfos"`
 }

@@ -1,106 +1,77 @@
 package proto
 
-type ILogicArg interface {
-	MustEmbedDefaultLogicArg()
-}
+// for api layer and connect layer rpc call
 
-type ILogicReply interface {
-	GetErrMsg() string
-	SetErrMsg(string)
-	MustEmbedDefaultLogicReply()
-}
-
-type LogicArg struct{}
-
-func (arg *LogicArg) MustEmbedDefaultLogicArg() {
-}
-
-type LogicReply struct {
-	ErrMsg string `json:"errMsg"`
-}
-
-func (reply *LogicReply) GetErrMsg() string {
-	return reply.ErrMsg
-}
-
-func (reply *LogicReply) SetErrMsg(msg string) {
-	reply.ErrMsg = msg
-}
-
-func (reply *LogicReply) MustEmbedDefaultLogicReply() {
-
-}
-
-type SigninArg struct {
-	*LogicArg
+type LogicSigninArg struct {
+	*DefaultRPCArg
 
 	UserName string
 	Password string
 }
 
-type SigninReply struct {
-	*LogicReply
+type LogicSigninReply struct {
+	*DefaultRPCReply
 
 	Code      int
 	AuthToken string
 }
 
-type SignupArg struct {
-	*LogicArg
+type LogicSignupArg struct {
+	*DefaultRPCArg
 
 	UserName string
 	Password string
 }
 
-type SignupReply struct {
-	*LogicReply
+type LogicSignupReply struct {
+	*DefaultRPCReply
 
 	Code      int
 	AuthToken string
 }
 
-type SignoutArg struct {
-	*LogicArg
+type LogicSignoutArg struct {
+	*DefaultRPCArg
 
 	AuthToken string
 }
 
-type SignoutReply struct {
-	*LogicReply
+type LogicSignoutReply struct {
+	*DefaultRPCReply
 
 	Code int
 }
 
-type AuthCheckArg struct {
-	*LogicArg
+type LogicAuthCheckArg struct {
+	*DefaultRPCArg
 
 	AuthToken string
 }
 
-type AuthCheckReply struct {
-	*LogicReply
+type LogicAuthCheckReply struct {
+	*DefaultRPCReply
 
 	Code     int
 	UserID   uint64
 	UserName string
 }
 
-type UserInfoQueryArg struct {
-	*LogicArg
+type LogicUserInfoQueryArg struct {
+	*DefaultRPCArg
 
 	UserID uint64
 }
 
-type UserInfoQueryReply struct {
-	*LogicReply
+type LogicUserInfoQueryReply struct {
+	*DefaultRPCReply
 
 	Code     int
 	UserID   uint64
 	UserName string
 }
 
-type PushArg struct {
-	*LogicArg
+type LogicPeerPushArg struct {
+	*DefaultRPCArg
 
 	Msg          string `json:"msg"`
 	FromUserId   uint64 `json:"fromUserID"`
@@ -112,37 +83,97 @@ type PushArg struct {
 	Timestamp    string `json:"timestamp"`
 }
 
-type PushReply struct {
-	*LogicReply
+type LogicPeerPushReply struct {
+	*DefaultRPCReply
 
 	Code int
 	Msg  string
 }
 
-type ConnectArg struct {
-	*LogicArg
+type LogicGroupPushArg struct {
+	*DefaultRPCArg
+
+	Msg          string `json:"msg"`
+	FromUserId   uint64 `json:"fromUserID"`
+	FromUserName string `json:"fromUserName"`
+	ToUserId     uint64 `json:"toUserID"`
+	ToUserName   string `json:"toUserName"`
+	GroupId      int    `json:"groupID"`
+	Op           int    `json:"op"`
+	Timestamp    string `json:"timestamp"`
+}
+
+type LogicGroupPushReply struct {
+	*DefaultRPCReply
+
+	Code int
+	Msg  string
+}
+
+type LogicGroupCountArg struct {
+	*DefaultRPCArg
+
+	Msg          string `json:"msg"`
+	FromUserId   uint64 `json:"fromUserID"`
+	FromUserName string `json:"fromUserName"`
+	ToUserId     uint64 `json:"toUserID"`
+	ToUserName   string `json:"toUserName"`
+	GroupId      int    `json:"groupID"`
+	Op           int    `json:"op"`
+	Timestamp    string `json:"timestamp"`
+}
+
+type LogicGroupCountReply struct {
+	*DefaultRPCReply
+
+	Code int
+	Msg  string
+}
+
+type LogicGroupInfoArg struct {
+	*DefaultRPCArg
+
+	Msg          string `json:"msg"`
+	FromUserId   uint64 `json:"fromUserID"`
+	FromUserName string `json:"fromUserName"`
+	ToUserId     uint64 `json:"toUserID"`
+	ToUserName   string `json:"toUserName"`
+	GroupId      int    `json:"groupID"`
+	Op           int    `json:"op"`
+	Timestamp    string `json:"timestamp"`
+}
+
+type LogicGroupInfoReply struct {
+	*DefaultRPCReply
+
+	Code int
+	Msg  string
+}
+
+type LogicConnectArg struct {
+	*DefaultRPCArg
 
 	AuthToken string `json:"authToken"`
 	GroupID   int    `json:"groupID"`
 	ServerID  int    `json:"serverID"`
 }
 
-type ConnectReply struct {
-	*LogicReply
+type LogicConnectReply struct {
+	*DefaultRPCReply
 
 	Code   int
 	UserID uint64
 }
 
-type DisconnectArg struct {
-	*LogicArg
+type LogicDisconnectArg struct {
+	*DefaultRPCArg
 
 	GroupID int
 	UserID  uint64
 }
 
-type DisconnectReply struct {
-	*LogicReply
+type LogicDisconnectReply struct {
+	*DefaultRPCReply
 
 	Code int
 }

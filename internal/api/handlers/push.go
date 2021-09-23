@@ -12,74 +12,69 @@ import (
 	"im/pkg/proto"
 )
 
-type FormPeerPush struct {
-	Msg       string `form:"msg" json:"msg" binding:"required"`
-	ToUserID  string `form:"toUserID" json:"toUserID" binding:"required"`
-	ToGroupID string `form:"toGroupID" json:"toGroupID" binding:"required"`
-	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
-}
+// rpcc
 
 func PeerPush(c *gin.Context) {
-	var form FormPeerPush
+	var req proto.APIPeerPushRequest
 
-	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
-		Failed(c, Response{})
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		Failed(c, "", nil)
 		return
 	}
 
-	toUserID, _ := strconv.ParseUint(form.ToUserID, 0, 64)
+	toUserID, _ := strconv.ParseUint(req.ToUserID, 0, 64)
 
-	replyUserInfoQuery := new(proto.UserInfoQueryReply)
+	replyUserInfoQuery := new(proto.LogicUserInfoQueryReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"UserInfoQuery",
-		&proto.UserInfoQueryArg{
+		&proto.LogicUserInfoQueryArg{
 			UserID: toUserID,
 		},
 		replyUserInfoQuery,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.UserInfoQueryReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicUserInfoQueryReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(replyUserInfoQuery.GetErrMsg(), nil))
+		Failed(c, replyUserInfoQuery.GetErrMsg(), nil)
 		return
 	}
 
 	toUserName := replyUserInfoQuery.UserName
 
-	replyAuthCheck := new(proto.AuthCheckReply)
+	replyAuthCheck := new(proto.LogicAuthCheckReply)
 
 	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"AuthCheck",
-		&proto.AuthCheckArg{
-			AuthToken: form.AuthToken,
+		&proto.LogicAuthCheckArg{
+			AuthToken: req.AuthToken,
 		},
 		replyAuthCheck,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.AuthCheckReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicAuthCheckReply)
 			return _reply.Code != proto.CodeFailedReply && _reply.UserID >= uint64(0) && _reply.UserName != ""
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(replyAuthCheck.GetErrMsg(), nil))
+		Failed(c, replyAuthCheck.GetErrMsg(), nil)
 		return
 	}
 
 	fromUserID := replyAuthCheck.UserID
 	fromUserName := replyAuthCheck.UserName
 
-	toGroupID, _ := strconv.Atoi(form.ToGroupID)
+	toGroupID, _ := strconv.Atoi(req.ToGroupID)
 
-	replyPeerPush := new(proto.PushReply)
+	replyPeerPush := new(proto.LogicPeerPushReply)
 
 	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"PeerPush",
-		&proto.PushArg{
-			Msg:          form.Msg,
+		&proto.LogicPeerPushArg{
+			Msg:          req.Msg,
 			FromUserId:   fromUserID,
 			FromUserName: fromUserName,
 			ToUserId:     toUserID,
@@ -89,64 +84,61 @@ func PeerPush(c *gin.Context) {
 			Timestamp:    common.CreateTimestamp(),
 		},
 		replyPeerPush,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.PushReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicPeerPushReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(replyPeerPush.GetErrMsg(), nil))
+		Failed(c, replyPeerPush.GetErrMsg(), nil)
 		return
 	}
 
-	Success(c, NewResponse("ok", nil))
-}
-
-type FormGroupPush struct {
-	Msg       string `form:"msg" json:"msg" binding:"required"`
-	ToGroupID string `form:"toGroupID" json:"toGroupID" binding:"required"`
-	AuthToken string `form:"authToken" json:"authToken" binding:"required"`
+	Success(c, "ok", nil)
 }
 
 func GroupPush(c *gin.Context) {
-	var form FormGroupPush
+	var req proto.APIGroupPushRequest
 
-	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
-		Failed(c, Response{})
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		Failed(c, "", nil)
 		return
 	}
 
-	replyAuthCheck := new(proto.AuthCheckReply)
+	replyAuthCheck := new(proto.LogicAuthCheckReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"AuthCheck",
-		&proto.AuthCheckArg{
-			AuthToken: form.AuthToken,
+		&proto.LogicAuthCheckArg{
+			AuthToken: req.AuthToken,
 		},
 		replyAuthCheck,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.AuthCheckReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicAuthCheckReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
 	if !ok {
-		ResponseWithCode(c, proto.CodeSessionError, NewResponse(replyAuthCheck.GetErrMsg(), nil))
+		ResponseWithCode(c, proto.CodeSessionError, proto.APIResponse{
+			Msg:  replyAuthCheck.GetErrMsg(),
+			Data: nil,
+		})
 		return
 	}
 
 	fromUserID := replyAuthCheck.UserID
 	fromUserName := replyAuthCheck.UserName
 
-	toGroupID, _ := strconv.Atoi(form.ToGroupID)
+	toGroupID, _ := strconv.Atoi(req.ToGroupID)
 
-	replyGroupPush := new(proto.PushReply)
+	replyGroupPush := new(proto.LogicGroupPushReply)
 
 	ok = rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"GroupPush",
-		&proto.PushArg{
-			Msg:          form.Msg,
+		&proto.LogicGroupPushArg{
+			Msg:          req.Msg,
 			FromUserId:   fromUserID,
 			FromUserName: fromUserName,
 			GroupId:      toGroupID,
@@ -154,93 +146,85 @@ func GroupPush(c *gin.Context) {
 			Timestamp:    common.CreateTimestamp(),
 		},
 		replyGroupPush,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.PushReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicGroupPushReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(replyGroupPush.GetErrMsg(), nil))
+		Failed(c, replyGroupPush.GetErrMsg(), nil)
 		return
 	}
 
-	Success(c, NewResponse("ok", nil))
+	Success(c, "ok", nil)
 
-}
-
-type FormGroupCount struct {
-	GroupID string `form:"toGroupID" json:"toGroupID" binding:"required"`
 }
 
 func GroupCount(c *gin.Context) {
-	var form FormGroupCount
+	var req proto.APIGroupCountRequest
 
-	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
-		Failed(c, Response{})
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		Failed(c, "", nil)
 		return
 	}
 
-	groupID, _ := strconv.Atoi(form.GroupID)
+	groupID, _ := strconv.Atoi(req.GroupID)
 
-	reply := new(proto.PushReply)
+	reply := new(proto.LogicGroupCountReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"GroupCount",
-		&proto.PushArg{
+		&proto.LogicGroupCountArg{
 			GroupId:   groupID,
 			Op:        proto.OpGroupCount,
 			Timestamp: common.CreateTimestamp(),
 		},
 		reply,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.PushReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicGroupCountReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(reply.GetErrMsg(), nil))
+		Failed(c, reply.GetErrMsg(), nil)
 		return
 	}
 
-	Success(c, NewResponse("ok", nil))
-}
-
-type FormGroupInfo struct {
-	GroupID string `form:"toGroupID" json:"toGroupID" binding:"required"`
+	Success(c, "ok", nil)
 }
 
 func GroupInfo(c *gin.Context) {
-	var form FormGroupInfo
+	var req proto.APIGroupInfoRequest
 
-	if err := c.ShouldBindBodyWith(&form, binding.JSON); err != nil {
-		Failed(c, Response{})
+	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
+		Failed(c, "", nil)
 		return
 	}
 
-	groupID, _ := strconv.Atoi(form.GroupID)
+	groupID, _ := strconv.Atoi(req.GroupID)
 
-	reply := new(proto.PushReply)
+	reply := new(proto.LogicGroupInfoReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathLogic).Call(
 		"GroupInfo",
-		&proto.PushArg{
+		&proto.LogicGroupInfoArg{
 			GroupId:   groupID,
 			Op:        proto.OpGroupInfo,
 			Timestamp: common.CreateTimestamp(),
 		},
 		reply,
-		func(reply proto.ILogicReply) bool {
-			_reply := reply.(*proto.PushReply)
+		func(reply proto.IRPCReply) bool {
+			_reply := reply.(*proto.LogicGroupInfoReply)
 			return _reply.Code != proto.CodeFailedReply
 		},
 	)
 
 	if !ok {
-		Failed(c, NewResponse(reply.GetErrMsg(), nil))
+		Failed(c, reply.GetErrMsg(), nil)
 		return
 	}
 
-	Success(c, NewResponse("ok", nil))
+	Success(c, "ok", nil)
 }

@@ -9,27 +9,21 @@ import (
 	"im/pkg/proto"
 )
 
-type Response struct {
-	Msg  string
-	Data common.Any
-}
-
-func NewResponse(msg string, data common.Any) Response {
-	return Response{
+func Success(c *gin.Context, msg string, data common.Any) {
+	ResponseWithCode(c, proto.CodeSuccessReply, proto.APIResponse{
 		Msg:  msg,
 		Data: data,
-	}
+	})
 }
 
-func Success(c *gin.Context, resp Response) {
-	ResponseWithCode(c, proto.CodeSuccessReply, resp)
+func Failed(c *gin.Context, msg string, data common.Any) {
+	ResponseWithCode(c, proto.CodeFailedReply, proto.APIResponse{
+		Msg:  msg,
+		Data: data,
+	})
 }
 
-func Failed(c *gin.Context, resp Response) {
-	ResponseWithCode(c, proto.CodeFailedReply, resp)
-}
-
-func ResponseWithCode(c *gin.Context, code int, resp Response) {
+func ResponseWithCode(c *gin.Context, code int, resp proto.APIResponse) {
 	c.AbortWithStatusJSON(http.StatusOK, gin.H{
 		"code": proto.CodeText(code),
 		"msg":  resp.Msg,
