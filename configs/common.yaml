@@ -1,0 +1,16 @@
+common:
+  etcd:
+    basePath: "/im_srv"
+    host: "127.0.0.1:2379"
+    serverPathConnect: "connect_rpc"
+    serverPathLogic: "logic_rpc"
+  redis:
+    queueName: "im_queue"
+    baseValidTime: 86400
+    prefix: "im_"
+    groupPrefix: "im_group_"
+    groupCountPrefix: "im_group_count_"
+    address: "127.0.0.1:6379"
+    password: ""
+    dbidx: 0
+    maxConnAge: 20

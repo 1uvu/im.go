@@ -12,14 +12,16 @@ func SHA1(text string) string {
 	return fmt.Sprintf("%x", hashedText)
 }
 
+// todo mod
+
 func SaltPassword(passwordHash string) string {
-	return ""
+	return passwordHash
 }
 
 func CheckPassword(saltedPassword string) bool {
-	return false
+	return saltedPassword == UnsaltPassword(saltedPassword)
 }
 
 func UnsaltPassword(saltedPassword string) string {
-	return ""
+	return saltedPassword
 }

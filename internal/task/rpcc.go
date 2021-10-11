@@ -9,21 +9,21 @@ import (
 	"im/pkg/proto"
 )
 
-func (task *Task) peerPush(pushArg *PushArg) {
+func (task *Task) peerPush(pushParam *PushParam) {
 	arg := &proto.ConnectPeerArg{
-		UserID: pushArg.UserID,
+		UserID: pushParam.UserID,
 		Msg: proto.Msg{
 			Ver:       proto.GetVersion(),
 			Operation: proto.OpGroupPush,
 			SeqID:     common.GetSnowflakeID(1),
-			Body:      pushArg.Msg,
+			Body:      pushParam.Msg,
 		},
 	}
 
 	reply := new(proto.ConnectReply)
 
 	ok := rpc.GetStub(config.GetConfig().Common.ETCD.ServerPathConnect).Call(
-		pushArg.ServerIDx,
+		pushParam.ServerIDx,
 		"Peer",
 		arg,
 		reply,

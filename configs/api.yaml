@@ -1,0 +1,4 @@
+api:
+  runMode: debug
+  listenPort: 7070
+  corsFlag: true

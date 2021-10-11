@@ -1,0 +1,15 @@
+logic:
+  cpus: 4
+  rpcAddress: "tcp@127.0.0.1:6900,tcp@127.0.0.1:6901"
+  saltForPassword:
+  auth:
+    certPath:
+    keyPath:
+  db:
+    dbName: "im"
+    sqlite:
+      dbPath: "./im_sqlite3.db"
+      maxIdleConns: 4
+      maxOpenConns: 20
+      connMaxLifetime: 8
+      connMaxIdletime: 4

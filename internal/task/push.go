@@ -9,25 +9,25 @@ import (
 	"im/pkg/proto"
 )
 
-type PushArg struct {
+type PushParam struct {
 	ServerIDx string
 	GroupID   int
 	UserID    uint64
 	Msg       []byte
 }
 
-var pushChan []chan *PushArg
+var pushChan []chan *PushParam
 
 func init() {
-	pushChan = make([]chan *PushArg, config.GetConfig().Task.PushChanCap)
+	pushChan = make([]chan *PushParam, config.GetConfig().Task.PushChanCap)
 }
 
 func (task *Task) DoPush() {
 	for i := range pushChan {
-		pushChan[i] = make(chan *PushArg, config.GetConfig().Task.PushParamsCap)
+		pushChan[i] = make(chan *PushParam, config.GetConfig().Task.PushParamsCap)
 
-		go func(ch <-chan *PushArg) {
-			var arg *PushArg
+		go func(ch <-chan *PushParam) {
+			var arg *PushParam
 			for {
 				arg = readChan(ch)
 				task.peerPush(arg)
@@ -46,13 +46,13 @@ func (task *Task) Push(paramStr string) {
 	switch iparam.GetOp() {
 	case proto.OpPeerPush:
 		param := iparam.(proto.TaskPeerPushParam)
-		pushArg := &PushArg{
+		pushParam := &PushParam{
 			UserID:    param.UserID,
 			ServerIDx: param.ServerIDx,
 			Msg:       param.Msg,
 		}
 
-		writeChan(pushArg, pushChan[common.RandInt(config.GetConfig().Task.PushChanCap)])
+		writeChan(pushParam, pushChan[common.RandInt(config.GetConfig().Task.PushChanCap)])
 	case proto.OpGroupPush:
 		param := iparam.(proto.TaskGroupPushParam)
 		task.groupPush(&param)
@@ -67,11 +67,11 @@ func (task *Task) Push(paramStr string) {
 	}
 }
 
-func readChan(ch <-chan *PushArg) *PushArg {
+func readChan(ch <-chan *PushParam) *PushParam {
 	return <-ch
 }
 
-func writeChan(arg *PushArg, ch chan<- *PushArg) {
+func writeChan(arg *PushParam, ch chan<- *PushParam) {
 	ch <- arg
 }
 
@@ -85,13 +85,13 @@ func writeChan(arg *PushArg, ch chan<- *PushArg) {
 // 	case proto.OpPeerPush:
 // 		param := new(proto.TaskPeerPushParam)
 // 		readParam(paramStr, param)
-// 		pushArg := &PushArg{
+// 		pushParam := &PushParam{
 // 			UserID:    param.UserID,
 // 			ServerIDx: param.ServerIDx,
 // 			Msg:       param.Msg,
 // 		}
 
-// 		writeChan(pushArg, pushChan[common.RandInt(config.GetConfig().Task.PushChanCap)])
+// 		writeChan(pushParam, pushChan[common.RandInt(config.GetConfig().Task.PushChanCap)])
 // 	case proto.OpGroupPush:
 // 		param := new(proto.TaskGroupPushParam)
 // 		readParam(paramStr, param)

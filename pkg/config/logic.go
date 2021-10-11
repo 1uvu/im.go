@@ -4,7 +4,7 @@ import "time"
 
 type LogicConfig struct {
 	CPUs            int       `yaml:"cpus"`
-	RPCAddress      string    `yaml:"rpcaddress"`
+	RPCAddress      string    `yaml:"rpcAddress"`
 	SaltForPassword string    `yaml:"saltForPassword"`
 	Auth            LogicAuth `yaml:"auth"`
 	DB              LogicDB   `yaml:"db"`
@@ -25,5 +25,5 @@ type SqliteDB struct {
 	MaxIdleConns    int           `yaml:"maxIdleConns"`
 	MaxOpenConns    int           `yaml:"maxOpenConns"`
 	ConnMaxLifetime time.Duration `yaml:"connMaxLifetime"`
-	ConnMaxIdletime time.Duration `yaml:"connMaxLifetime"`
+	ConnMaxIdletime time.Duration `yaml:"connMaxIdleime"`
 }

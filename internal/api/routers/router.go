@@ -5,6 +5,7 @@ import (
 
 	"im/internal/api/handlers"
 	"im/internal/api/middlewares"
+	"im/pkg/config"
 	"im/pkg/proto"
 )
 
@@ -14,7 +15,11 @@ var router *gin.Engine
 
 func init() {
 	router = gin.Default()
-	router.Use(middlewares.CORS())
+
+	if config.GetConfig().API.CORSFlag {
+		router.Use(middlewares.CORS())
+	}
+
 	initUserRouter(router)
 	initPushRouter(router)
 	router.NoRoute(func(c *gin.Context) {

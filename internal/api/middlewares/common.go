@@ -55,12 +55,11 @@ func SessionCheck() gin.HandlerFunc {
 
 func CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if config.GetConfig().API.CORSFlag {
-			c.Header("Access-Control-Allow-Origin", "*")
-			c.Header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-			c.Header("Access-Control-Allow-Methods", "GET, OPTIONS, POST, PUT, DELETE")
-			c.Set("content-type", "application/json")
-		}
+
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+		c.Header("Access-Control-Allow-Methods", "GET, OPTIONS, POST, PUT, DELETE")
+		c.Set("content-type", "application/json")
 
 		method := c.Request.Method
 		if method == "OPTIONS" {

@@ -1,0 +1,6 @@
+task:
+  cpus: 4
+  pushPolling: 10
+  pushChanCap: 2
+  pushParamsCap: 50
+  

@@ -19,8 +19,7 @@ type ConnectAuth struct {
 }
 
 type ConnectWebsocket struct {
-	ServerIDx string `yaml:"serverIDx"`
-	Bind      string `yaml:"bind"`
+	Bind string `yaml:"bind"`
 }
 
 type ConnectWebsocketRPC struct {
@@ -28,7 +27,6 @@ type ConnectWebsocketRPC struct {
 }
 
 type ConnectTCP struct {
-	ServerIDx        string `yaml:"serverIDx"`
 	Bind             string `yaml:"bind"`
 	SendBuffer       int    `yaml:"sendBuffer"`
 	ReceiveBuffer    int    `yaml:"receiveBuffer"`

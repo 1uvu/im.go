@@ -1,0 +1,38 @@
+connect:
+  sessionExpireTime: 86400
+  auth:
+    certPath:
+    keyPath:
+  websocket:
+    bind: "0.0.0.0:7000"
+  websocketRPC:
+    rpcAddress: "tcp@0.0.0.0:6912,tcp@0.0.0.0:6913"
+  tcp:
+    bind: "0.0.0.0:7001,0.0.0.0:7002"
+    sendBuffer: 4096
+    receiveBuffer: 4096
+    keepalive: false
+    reader: 32
+    readBuffer: 1024
+    readBufferSize: 8192
+    writer: 32
+    writeBuffer: 1024
+    writeBufferSize: 8192
+  tcpRPC:
+    rpcAddress: "tcp@0.0.0.0:6914,tcp@0.0.0.0:6915"
+  bucket:
+    cpus: 4
+    dialogNum: 1024
+    groupNum: 1024
+    argAmount: 32
+    argSize: 20
+    srvProto: 80
+  server:
+    writeWait: 10
+    pongWait: 60
+    pingPeriod: 54
+    maxMessageSize: 512
+    rBufferSize: 1024
+    wBufferSize: 1024
+    BroadcastSize: 512
+    
