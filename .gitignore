@@ -16,3 +16,6 @@ vendor/
 *.txt
 
 *.db
+
+bin/
+
